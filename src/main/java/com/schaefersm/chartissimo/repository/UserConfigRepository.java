@@ -1,11 +1,13 @@
 package com.schaefersm.chartissimo.repository;
 
-import java.util.Optional;
-
+import org.bson.types.ObjectId;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.http.ResponseEntity;
 
 import com.schaefersm.chartissimo.model.UserConfig;
 
 public interface UserConfigRepository extends CrudRepository<UserConfig, String> {
-	Optional<UserConfig> findByUserId(String id);
+
+	ResponseEntity<UserConfig> findByUser(ObjectId userId);
+
 }
