@@ -1,7 +1,10 @@
 package com.schaefersm.chartissimo.controller;
 
-import java.util.Optional;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,20 +24,25 @@ public class UserController {
 		this.userRepository = userRepository;
 	}
 
-	@GetMapping("/{id}")
-	public Optional<User> getUserId(@PathVariable String id) {
-		System.out.println(id);
-		Optional<User> user = this.userRepository.findById(id);
-		System.out.println(user);
-		return user;
-	}
+	@Autowired
+	private MongoTemplate mongoTemplate;
 
-	@GetMapping("/{id}/{name}")
-	public Optional<User> getUser(@PathVariable String name) {
-		System.out.println(name);
-		Optional<User> user = this.userRepository.findByName(name);
-		System.out.println(user);
-		return user;
+//	@GetMapping("/{id}")
+//	public Optional<User> getUserId(@PathVariable String id) {
+//		System.out.println(id);
+//		Optional<User> user = this.userRepository.findById(id);
+//		System.out.println(user);
+//		return user;
+//	}
+
+	@GetMapping("/{user}")
+	public ResponseEntity<User> findUserById(@PathVariable("user") String user) {
+		Query query = new Query();
+		query.addCriteria(Criteria.where("_id").is(user));
+		System.out.println(query);
+		User userconfig = mongoTemplate.findOne(query, User.class);
+		System.out.println(userconfig);
+		return ResponseEntity.ok(userconfig);
 	}
 
 }
