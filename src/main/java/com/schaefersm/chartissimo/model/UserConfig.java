@@ -1,49 +1,38 @@
 package com.schaefersm.chartissimo.model;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import javax.persistence.Id;
 
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import lombok.Data;
+
+@Data
 @Document(collection = "userconfig")
 public class UserConfig {
 
 	@Id
-	private String id;
+	private String _id;
 
-	@DBRef()
-	private User user;
+	private String user;
 
-	private HashMap<String, Integer> config = new HashMap<String, Integer>();
-
-	public String getId() {
-		return id;
-	}
+	private Map<String, Integer> config;
 
 	public UserConfig() {
-
+		// TODO Auto-generated constructor stub
 	}
 
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	public User getUser() {
+	public String getUser() {
 		return user;
 	}
 
-	public void setUser(User user) {
+	public void setUser(String user) {
 		this.user = user;
 	}
 
-	public Integer getConfig(String configKey) {
-		return config.get(configKey);
+	public Map<String, Integer> getConfig() {
+		return config;
 	}
-//
-//	public void setConfig(String configKey, int configValue) {
-//		this.config.put(configKey, configValue);
-//	}
 
 }
