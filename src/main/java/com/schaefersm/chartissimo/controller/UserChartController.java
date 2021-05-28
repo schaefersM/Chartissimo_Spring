@@ -1,92 +1,95 @@
 package com.schaefersm.chartissimo.controller;
 
 import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import com.schaefersm.chartissimo.model.UserChart;
+import com.schaefersm.chartissimo.service.UserChartService;
 
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.schaefersm.chartissimo.model.UserChart;
-import com.schaefersm.chartissimo.repository.UserChartRepository;
 
 @RestController
 @RequestMapping("/api/user")
 @CrossOrigin(origins = "http://localhost")
 public class UserChartController {
 
-	private UserChartRepository userChartRepository;
-
 	@Autowired
-	private MongoTemplate mongoTemplate;
-
-	public UserChartController(UserChartRepository userChartRepository) {
-		this.userChartRepository = userChartRepository;
-	}
-
-//	@GetMapping("/{userId}/charts")
-//	public Iterable<UserChart> getAllCharts(@PathVariable ObjectId userId) {
-//		Iterable<UserChart> userCharts = this.userChartRepository.findAll();
-//		return userCharts;
-//	}
+	private UserChartService userChartService;
 
 	@GetMapping("/{userId}/charts")
-	public ResponseEntity<List<UserChart>> getAllCharts(@PathVariable("userId") ObjectId userId) {
-		List<UserChart> userCharts = mongoTemplate.findAll(UserChart.class);
+	public ResponseEntity<Map<String, Object>> getAllCharts(
+		@PathVariable("userId") ObjectId userId, 
+		@RequestParam(defaultValue = "-1") int page,
+		@RequestParam(defaultValue = "1") int size,
+		@RequestParam(required = false) List<String> location,
+		@RequestParam(required = false) List<String> type,
+		HttpServletRequest test) {
+		Map<String, Object> userCharts = userChartService.readAllCharts(userId, page, size,  location, type, test);
 		if (userCharts != null) {
-			return ResponseEntity.ok(userCharts);
+			return ResponseEntity.status(HttpStatus.OK).body(userCharts);
 		} else {
-			return ResponseEntity.notFound().build();
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		}
 	}
 
 	@GetMapping("/{userId}/charts/{chartId}")
 	public ResponseEntity<UserChart> getOneChart(@PathVariable("userId") ObjectId userId,
 			@PathVariable("chartId") Double chartId) {
-		Query query = new Query();
-		query.addCriteria(Criteria.where("chartId").is(chartId));
-		query.fields().exclude("image");
-		System.out.println(query);
-		UserChart userChart = mongoTemplate.findOne(query, UserChart.class);
+		UserChart userChart = userChartService.readOneChart(userId, chartId);
 		if (userChart != null) {
-			return ResponseEntity.ok(userChart);
+			return ResponseEntity.status(HttpStatus.OK).body(userChart);
 		} else {
-			return ResponseEntity.notFound().build();
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		}
 	}
 
 	@PostMapping("/{userId}/charts")
-	public void addOneChart(@PathVariable("userId") ObjectId userId,
-//			@RequestBody Map<String, Object> body) {
+	public ResponseEntity<Map<String, Object>> addOneChart(@PathVariable("userId") ObjectId userId,
 			@RequestBody UserChart userChart) {
-		System.out.println(userChart.getName());
-		mongoTemplate.insert(userChart, "userchart");
+		Map<String, Object> response = userChartService.createOneChart(userId, userChart);
+		if (response.get("errorMessage") == null && response != null) {
+			return ResponseEntity.status(HttpStatus.CREATED).build();
+		} else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+		}
 	}
 
-//	@PostMapping("/{userId}/charts")
-//	public ResponseEntity<UserChart> addOneChart(@PathVariable("userId") ObjectId userId,
-////			@RequestBody Map<String, Object> body) {
-//			@RequestBody UserChart userChart) {
-//		System.out.println(userChart.getName());
-//		mongoTemplate.insert(null, null)
-////		System.out.println(body.get("name"));
-//		Query query = new Query();
-//		System.out.println(query);
-//		UserChart newUserChart = mongoTemplate.findOne(query, UserChart.class);
-//		if (newUserChart != null) {
-//			ResponseEntity.accepted().build();
-//			return ResponseEntity.ok(newUserChart);
-//		} else {
-//			return ResponseEntity.noContent().build();
-//		}
-//	}
+	@PutMapping("/{userId}/charts/{chartId}")
+	public ResponseEntity<Map<String, Object>> updateOneChart(@PathVariable("userId") ObjectId userId, 
+			@PathVariable("chartId") Double chartId,
+			@RequestBody UserChart userChart) {
+		Map<String, Object> response = userChartService.updateOneChart(userId, chartId, userChart);
+		if (response.get("errorMessage") == null && response != null) {
+			return ResponseEntity.status(HttpStatus.CREATED).build();
+		} else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+		}
+	}
+
+	@DeleteMapping("/{userId}/charts/{chartId}")
+	public ResponseEntity<Map<String, Object>> deleteOneChart(@PathVariable("userId") ObjectId userId,
+			@PathVariable("chartId") Double chartId, @RequestBody Map<String, Object> body) {
+		Map<String, Object> response = userChartService.deleteOneChart(userId, chartId, body);
+		if (response.get("errorMessage") == null && response != null) {
+			return ResponseEntity.status(HttpStatus.OK).build();
+		} else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+		}
+	}
+
 }
