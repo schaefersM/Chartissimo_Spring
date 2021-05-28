@@ -8,5 +8,4 @@ import com.schaefersm.chartissimo.model.UserChart;
 
 public interface UserChartRepository extends CrudRepository<UserChart, String> {
 
-	Optional<UserChart> findByChartId(Double chartId);
 }
