@@ -1,9 +1,10 @@
 package com.schaefersm.chartissimo.model;
 
-import java.util.Map;
+import java.util.HashMap;
 
 import javax.persistence.Id;
 
+import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.Data;
@@ -15,24 +16,36 @@ public class UserConfig {
 	@Id
 	private String _id;
 
-	private String user;
+	private ObjectId user;
 
-	private Map<String, Integer> config;
+	private HashMap<String, Object> config;
 
 	public UserConfig() {
-		// TODO Auto-generated constructor stub
+
 	}
 
-	public String getUser() {
-		return user;
+	public UserConfig(String id, ObjectId user, HashMap<String, Object> config) {
+		this._id = id;
+		this.user = user;
+		this.config = config;
 	}
 
-	public void setUser(String user) {
+	public UserConfig(HashMap<String, Object> config, ObjectId user) {
+		this.config = config;
 		this.user = user;
 	}
 
-	public Map<String, Integer> getConfig() {
+
+	public void setUser(ObjectId user) {
+		this.user = user;
+	}
+
+	public HashMap<String, Object> getConfig() {
 		return config;
+	}
+
+	public void setConfig(HashMap<String, Object> config) {
+		this.config = config;
 	}
 
 }
