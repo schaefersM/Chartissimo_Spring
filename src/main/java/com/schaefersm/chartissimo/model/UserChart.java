@@ -1,12 +1,12 @@
 package com.schaefersm.chartissimo.model;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
 
 import lombok.Data;
 
@@ -16,22 +16,22 @@ public class UserChart {
 
 	@Id
 	private String _id;
-	private LocalDate createdAt;
-	private Map<String, Object> data;
-	private List<String> hosts;
-	private String chartType;
-	private Map<String, Integer> customOptions;
-	@Field("id")
-	private Double chartId;
-	private String image;
-	private LocalDate lastModified;
+	private ObjectId user;
 	private String name;
-	private String user;
+	private Double id;
+	private String chartType;
+	private List<String> hosts;
+	private Map<String, Object> data;
+	private Map<String, Integer> customOptions;
+	private LocalDateTime createdAt = LocalDateTime.now();
+	private LocalDateTime lastModified = LocalDateTime.now();
+	private String image;
+
 
 	@Override
 	public String toString() {
 
-		return String.format("%s %s %s", getName(), getUser(), get_id());
+		return String.format("%s %s", getChartType(), getHosts());
 	}
 
 	public String get_id() {
@@ -42,11 +42,11 @@ public class UserChart {
 		this._id = _id;
 	}
 
-	public LocalDate getCreatedAt() {
+	public LocalDateTime getCreatedAt() {
 		return createdAt;
 	}
 
-	public void setCreatedAt(LocalDate createdAt) {
+	public void setCreatedAt(LocalDateTime createdAt) {
 		this.createdAt = createdAt;
 	}
 
@@ -82,12 +82,12 @@ public class UserChart {
 		this.customOptions = customOptions;
 	}
 
-	public Double getChartId() {
-		return chartId;
+	public Double getId() {
+		return id;
 	}
 
-	public void setChartId(Double chartId) {
-		this.chartId = chartId;
+	public void setId(Double id) {
+		this.id = id;
 	}
 
 	public String getImage() {
@@ -98,12 +98,12 @@ public class UserChart {
 		this.image = image;
 	}
 
-	public LocalDate getLastModified() {
+	public LocalDateTime getLastModified() {
 		return lastModified;
 	}
 
-	public void setLastModified(LocalDate lastModified) {
-		this.lastModified = lastModified;
+	public void setLastModified() {
+		this.lastModified = LocalDateTime.now();;
 	}
 
 	public String getName() {
@@ -114,11 +114,11 @@ public class UserChart {
 		this.name = name;
 	}
 
-	public String getUser() {
+	public ObjectId getUser() {
 		return user;
 	}
 
-	public void setUser(String user) {
+	public void setUser(ObjectId user) {
 		this.user = user;
 	}
 
