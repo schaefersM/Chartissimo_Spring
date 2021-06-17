@@ -2,7 +2,6 @@ package com.schaefersm.chartissimo.model;
 
 import java.time.LocalDate;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -16,19 +15,14 @@ public class Informatik {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @Column(name = "host")
     private String host;
 
-    @Column(name = "value")
     private int value;
 
-    @Column(name = "hour")
     private int hour;
 
-    @Column(name = "minute")
     private int minute;
 
-    @Column(name = "datum")
     private LocalDate datum;
 
     public int getId() {
