@@ -4,11 +4,15 @@ pipeline {
         def BUILDVERSION = sh(script: "echo `date +%d%m%H%M`", returnStdout: true).trim()
     }
         stages {
-            stage('build') {
+            stage('package') {
                 steps {
                     sh './mvnw package'
-                    sh 'docker build --no-cache -t java-user:BUILDVERSION .'
                 }
             }
+            stage('build') {
+                steps {
+                    sh 'docker build --no-cache -t java-user:BUILDVERSION .'
+                }
+            }            
         }
 }
