@@ -25,15 +25,16 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserChartService {
     
-    private String dockerHost = "localhost";
-    private String dockerPort = "8000";
+    private String dockerHost = "192.168.72.132";
+    private String dockerPort = "30005";
 
     @Autowired
     private MongoTemplate mongoTemplate;
 
     
-    public Map<String, Object> readAllChartsPaginated(ObjectId userId, int page, int size, List<String> host, List<String> type, HttpServletRequest test) {
+    public Map<String, Object> readAllChartsPaginated(ObjectId userId, int page, int size, List<String> host, List<String> type, HttpServletRequest request) {
         try {
+            System.out.println(host);
             Map<String, Object> response = new HashMap<>();
             Pageable paging = PageRequest.of(page, size);
             Query query = new Query();
@@ -49,7 +50,7 @@ public class UserChartService {
             Page<UserChart> chartPage = PageableExecutionUtils.getPage(chartPages, paging, () -> mongoTemplate.count(Query.of(query).limit(-1).skip(-1), UserChart.class));
             Map<String, Object> links = new HashMap<>();
             if(!chartPages.isEmpty()) {
-                links = generateLinks(userId, page, size, chartPage, test);
+                links = generateLinks(userId, page, size, chartPage, request);
             } else {
                 return null;
             } 
@@ -61,17 +62,16 @@ public class UserChartService {
         }
     }
     
-    public Map<String, Object> generateLinks(ObjectId userId, int page, int size, Page<UserChart> pageContent, HttpServletRequest test) {
-        String [] splittedQueryParams = test.getQueryString().split("&");
+    public Map<String, Object> generateLinks(ObjectId userId, int page, int size, Page<UserChart> pageContent, HttpServletRequest request) {
+        String [] splittedQueryParams = request.getQueryString().split("&");
         String [] rangedQueryParams = Arrays.copyOfRange(splittedQueryParams, 2, splittedQueryParams.length);
         String paramString = "";
         for(String param : rangedQueryParams) {
-            System.out.println(param);
             paramString += "&" + param;
         }
         Map<String, Object> links = new HashMap<>();
         String baseUrl = String.format("http://%s:%s/api/user/%s/charts", dockerHost, dockerPort, userId);
-        String self = String.format("%s?page=%s&size=%s", baseUrl, page, size);
+        String self = String.format("%s?page=%s&size=%s&%s", baseUrl, page, size, paramString);
         String next = (pageContent.hasNext()) ? String.format("%s?page=%s&size=%s&%s", baseUrl, page, size, paramString) : null;
         String prev = (pageContent.isFirst()) ? null : String.format("%s?page=%s&size=%s&%s", baseUrl, page-1, size, 
                 paramString);
@@ -86,8 +86,7 @@ public class UserChartService {
         return links;
     }
 
-    public Map<String, Object> readAllCharts(ObjectId userId, int page, int size, List<String> host, List<String> type, HttpServletRequest test) {
-
+    public Map<String, Object> readAllCharts(ObjectId userId, int page, int size, List<String> host, List<String> type, HttpServletRequest request) {
         //notPaginated
         if (page < 0) {
             try {
@@ -101,7 +100,7 @@ public class UserChartService {
                 return null;
             }
         } else {
-            Map<String, Object> response = readAllChartsPaginated(userId, page, size, host, type, test);
+            Map<String, Object> response = readAllChartsPaginated(userId, page, size, host, type, request);
             return response;
         }
     }

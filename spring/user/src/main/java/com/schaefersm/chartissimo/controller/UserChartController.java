@@ -38,8 +38,8 @@ public class UserChartController {
 		@RequestParam(defaultValue = "1") int size,
 		@RequestParam(required = false) List<String> location,
 		@RequestParam(required = false) List<String> type,
-		HttpServletRequest test) {
-		Map<String, Object> userCharts = userChartService.readAllCharts(userId, page, size,  location, type, test);
+		HttpServletRequest request) {
+		Map<String, Object> userCharts = userChartService.readAllCharts(userId, page, size,  location, type, request);
 		if (userCharts != null) {
 			return ResponseEntity.status(HttpStatus.OK).body(userCharts);
 		} else {
@@ -60,7 +60,7 @@ public class UserChartController {
 
 	@PostMapping("/{userId}/charts")
 	public ResponseEntity<Map<String, Object>> addOneChart(@PathVariable("userId") ObjectId userId,
-			@RequestBody UserChart userChart) {
+			UserChart userChart) {
 		Map<String, Object> response = userChartService.createOneChart(userId, userChart);
 		if (response.get("errorMessage") == null && response != null) {
 			return ResponseEntity.status(HttpStatus.CREATED).build();
