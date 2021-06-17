@@ -7,7 +7,6 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 
 @SpringBootApplication
 @EnableAutoConfiguration(exclude = { DataSourceAutoConfiguration.class })
-
 public class ChartissimoApplication {
 
 	public static void main(String[] args) {
