@@ -1,8 +1,10 @@
-pipeline {
-    stages {
-        stage('build') {
-            steps {
-                sh './mvnw package'
+node {
+    pipeline {
+        stages {
+            stage('build') {
+                steps {
+                    sh './mvnw package'
+                }
             }
         }
     }
