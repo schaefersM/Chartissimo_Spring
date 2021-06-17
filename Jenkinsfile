@@ -7,7 +7,7 @@ pipeline {
             stage('build') {
                 steps {
                     sh './mvnw package'
-                    sh 'docker build --no-cache -t java-user:BUILDVERSION'
+                    sh 'docker build --no-cache -t java-user:BUILDVERSION .'
                 }
             }
         }
