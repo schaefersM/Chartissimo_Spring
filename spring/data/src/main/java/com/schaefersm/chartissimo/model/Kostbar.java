@@ -1,6 +1,6 @@
 package com.schaefersm.chartissimo.model;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -17,18 +17,20 @@ public class Kostbar {
     private String host;
 
     private int value;
-
-    private int hour;
-
     
+    private int hour;
+    
+    private int minute;
 
+    private LocalDate datum;
+    
     @Override
     public String toString() {
         return "Kostbar [datum=" + datum + ", host=" + host + "]";
     }
 
 
-    public Kostbar(String host, int value, int hour, int minute, Date datum) {
+    public Kostbar(String host, int value, int hour, int minute, LocalDate datum) {
         this.host = host;
         this.value = value;
         this.hour = hour;
@@ -41,15 +43,12 @@ public class Kostbar {
     }
 
 
-    private int minute;
 
-    private Date datum;
-
-    public Date getDatum() {
+    public LocalDate getDatum() {
         return datum;
     }
 
-    public void setDatum(Date datum) {
+    public void setDatum(LocalDate datum) {
         this.datum = datum;
     }
 
