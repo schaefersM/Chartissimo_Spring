@@ -2,10 +2,7 @@ package com.schaefersm.chartissimo.controller;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
 
 import com.schaefersm.chartissimo.service.DatasetService;
 
@@ -41,7 +38,7 @@ public class DatasetController {
 		LocalDate parsedDatum = LocalDate.parse(datum, dateFormatter);
 		Map<String, Object> response = datasetService.getDatasets(dataType, parsedDatum, location, hour);
 		if (response.get("errorMessage") == null && response != null) {
-			return ResponseEntity.status(HttpStatus.CREATED).build();
+			return ResponseEntity.status(HttpStatus.OK).body(response);
 		} else {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
 		}
