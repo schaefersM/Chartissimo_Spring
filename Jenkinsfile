@@ -11,22 +11,22 @@ pipeline {
             }
             stage('build') {
                 steps {
-                    sh 'docker build --no-cache -t java-user:$(date +%d%m%H%M) .'
+                    sh 'docker build --no-cache -t java-user:${BUILDVERSION} .'
                 }
             }
             stage('tag') {
                 steps {
-                    sh 'docker tag java-user:$(date +%d%m%H%M) localhost:32000/java-user:$(date +%d%m%H%M) '
+                    sh 'docker tag java-user:${BUILDVERSION} localhost:32000/java-user:${BUILDVERSION}'
                 }
             }
-            stage('tag-test') {
-                steps {
-                    sh 'docker tag java-user:$(date +%d%m%H%M) java-user:${BUILDVERSION}'
-                }
-            }
+            // stage('tag-test') {
+            //     steps {
+            //         sh 'docker tag java-user:$(date +%d%m%H%M) java-user:${BUILDVERSION}'
+            //     }
+            // }
             stage('push') {
                 steps {
-                    sh 'docker push localhost:32000/java-user:$(date +%d%m%H%M)'
+                    sh 'docker push localhost:32000/java-user:${BUILDVERSION}'
                 }
             }
         }
