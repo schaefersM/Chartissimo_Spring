@@ -21,7 +21,7 @@ pipeline {
             }
             stage('tag-test') {
                 steps {
-                    sh 'docker tag java-user:$(date +%d%m%H%M) java-user::BUILDVERSION'
+                    sh 'docker tag java-user:$(date +%d%m%H%M) java-user:${BUILDVERSION}'
                 }
             }
             stage('push') {
