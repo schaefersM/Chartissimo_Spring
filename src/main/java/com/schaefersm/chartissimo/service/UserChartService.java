@@ -72,11 +72,11 @@ public class UserChartService {
         Map<String, Object> links = new HashMap<>();
         String baseUrl = String.format("http://%s:%s/api/user/%s/charts", dockerHost, dockerPort, userId);
         String self = String.format("%s?page=%s&size=%s", baseUrl, page, size);
-        String next = (pageContent.hasNext()) ? String.format("%s?page=%s&size=%s&%s", baseUrl, page, size, paramString) : null;
-        String prev = (pageContent.isFirst()) ? null : String.format("%s?page=%s&size=%s&%s", baseUrl, page-1, size, 
+        String next = (pageContent.hasNext()) ? String.format("%s?page=%s&size=%s%s", baseUrl, page, size, paramString) : null;
+        String prev = (pageContent.isFirst()) ? null : String.format("%s?page=%s&size=%s%s", baseUrl, page-1, size, 
                 paramString);
-        String first = String.format("%s?page=%s&size=%s&%s", baseUrl, 0, size, paramString);
-        String last = String.format("%s?page=%s&size=%s&%s", baseUrl, pageContent.getTotalPages()-1, size, 
+        String first = String.format("%s?page=%s&size=%s%s", baseUrl, 0, size, paramString);
+        String last = String.format("%s?page=%s&size=%s%s", baseUrl, pageContent.getTotalPages()-1, size, 
                 paramString);
         links.put("self", self);
         links.put("next", next);
