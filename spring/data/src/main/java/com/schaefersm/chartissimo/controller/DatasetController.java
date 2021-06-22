@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/data")
-@CrossOrigin(origins = {"http://localhost", "http://192.168.72.132"})
+@CrossOrigin(origins = {"http://localhost", "http://192.168.72.132:30000"})
 public class DatasetController {
 
     @Autowired
