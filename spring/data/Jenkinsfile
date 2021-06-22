@@ -1,0 +1,33 @@
+pipeline {
+    agent any
+    environment {
+        def BUILDVERSION = sh(script: "echo `date +%d%m%H%M`", returnStdout: true).trim()
+    }
+        stages {
+            stage('checkout') {
+                steps {
+                    checkout scm
+                }
+            }
+            stage('package') {
+                steps {
+                    sh './spring/data/mvnw -f ./spring/data package'
+                }
+            }
+            stage('build') {
+                steps {
+                    sh 'docker build --no-cache -t java-data:${BUILDVERSION} ./spring/data'
+                }
+            }
+            stage('tag') {
+                steps {
+                    sh 'docker tag java-data:${BUILDVERSION} localhost:32000/java-data:${BUILDVERSION}'
+                }
+            }
+            stage('push') {
+                steps {
+                    sh 'docker push localhost:32000/java-data:${BUILDVERSION}'
+                }
+            }
+        }
+}
