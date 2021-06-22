@@ -50,7 +50,7 @@ public class DatasetService {
         return String.format("%s_%s", location, typeAbrevations.get(dataType));
     }
 
-    public Map<String, Object> getDatasets(String dataType, LocalDate datum, String location, int hour) {
+    public Map<String, Object> getDatasets(String dataType, LocalDate date, String location, int hour) {
         Map<String, Object> response = new HashMap<>();
         if (dataType.equals("comparison")) {
             List<List<Map<String, Integer>>> datasetList = new ArrayList<>();
