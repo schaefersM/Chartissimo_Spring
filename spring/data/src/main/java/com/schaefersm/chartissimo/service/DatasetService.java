@@ -45,20 +45,6 @@ public class DatasetService {
             }
         return processedData;
     }
-    
-    
-
-    // public List<Integer[]> fetchData(Object repository, int hour, LocalDate datum, String host) {
-    //     List<Integer[]> fetchedData = new ArrayList<>();
-    //     List<Map<String, Integer>> processedData = new ArrayList<>();
-
-    //     if (hour == 25) {
-    //         return fetchedData = repository.findDailyDataset(host, datum);
-            
-    //     } else {
-    //         return fetchedData = repository.findHouryDataset(host, datum, hour);
-    //     }
-    // }
 
     public String generateHost(String dataType, String location) {
         return String.format("%s_%s", location, typeAbrevations.get(dataType));
