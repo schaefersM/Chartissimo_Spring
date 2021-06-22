@@ -30,13 +30,13 @@ public class DatasetController {
     @GetMapping("/{dataType}")
 	public ResponseEntity<Map<String, Object>> getDatasets(
 		@PathVariable("dataType") String dataType, 
-		@RequestParam(required = false) String datum,
+		@RequestParam(required = false) String date,
 		@RequestParam(required = false) String location,
 		@RequestParam(required = false) int hour) 
 	{
 
-		LocalDate parsedDatum = LocalDate.parse(datum, dateFormatter);
-		Map<String, Object> response = datasetService.getDatasets(dataType, parsedDatum, location, hour);
+		LocalDate parsedDate = LocalDate.parse(date, dateFormatter);
+		Map<String, Object> response = datasetService.getDatasets(dataType, parsedDate, location, hour);
 		if (response.get("errorMessage") == null && response != null) {
 			return ResponseEntity.status(HttpStatus.OK).body(response);
 		} else {
