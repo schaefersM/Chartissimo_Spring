@@ -11,7 +11,6 @@ pipeline {
             }
             stage('package') {
                 steps {
-                    sh './spring/data/mvnw -f ./spring/data clean install'
                     sh './spring/data/mvnw -f ./spring/data package'
                 }
             }
