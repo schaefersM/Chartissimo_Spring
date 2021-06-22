@@ -11,7 +11,7 @@ pipeline {
             }
             stage('package') {
                 steps {
-                    sh './spring/data/mvnw package'
+                    sh './mvnw package'
                 }
             }
             stage('build') {
