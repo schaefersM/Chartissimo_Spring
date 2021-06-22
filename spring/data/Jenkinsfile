@@ -17,7 +17,7 @@ pipeline {
             }
             stage('build') {
                 steps {
-                    sh 'docker build --no-cache -t java-data:${BUILDVERSION} .'
+                    sh 'docker build --no-cache -t java-data:${BUILDVERSION} -f ./spring/data/Dockerfile'
                 }
             }
             stage('tag') {
