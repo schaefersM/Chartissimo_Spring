@@ -4,6 +4,11 @@ pipeline {
         def BUILDVERSION = sh(script: "echo `date +%d%m%H%M`", returnStdout: true).trim()
     }
         stages {
+            stage('checkout') {
+                node {
+                    checkout scm
+                }
+            }
             stage('package') {
                 steps {
                     sh './mvnw package'
