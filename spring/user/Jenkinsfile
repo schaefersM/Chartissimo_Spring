@@ -6,12 +6,12 @@ pipeline {
         stages {
             stage('package') {
                 steps {
-                    sh './mvnw package'
+                    sh './spring/data/mvnw -f ./spring/data package'
                 }
             }
             stage('build') {
                 steps {
-                    sh 'docker build --no-cache -t java-user:${BUILDVERSION} .'
+                    sh 'docker build --no-cache -t java-user:${BUILDVERSION} ./spring/data'
                 }
             }
             stage('tag') {
