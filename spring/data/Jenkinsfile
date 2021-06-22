@@ -4,9 +4,14 @@ pipeline {
         def BUILDVERSION = sh(script: "echo `date +%d%m%H%M`", returnStdout: true).trim()
     }
         stages {
+            stage('checkout') {
+                steps {
+                    checkout scm
+                }
+            }
             stage('package') {
                 steps {
-                    sh './mvnw package'
+                    sh './spring/data/mvnw package'
                 }
             }
             stage('build') {
