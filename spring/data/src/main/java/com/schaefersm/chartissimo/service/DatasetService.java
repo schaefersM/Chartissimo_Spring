@@ -9,10 +9,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.schaefersm.chartissimo.repository.ArchitekturRepository;
-import com.schaefersm.chartissimo.repository.InformatikRepository;
-import com.schaefersm.chartissimo.repository.KostbarRepository;
-import com.schaefersm.chartissimo.repository.WirtschaftRepository;
 import com.schaefersm.chartissimo.Location;
 import com.schaefersm.chartissimo.dto.DailyDatasetDTO;
 import com.schaefersm.chartissimo.dto.DatasetDTO;
@@ -28,20 +24,24 @@ import org.springframework.stereotype.Service;
 @Service
 public class DatasetService {
     
-    @Autowired
     private KostbarRepository kostbarRepository;
 
-    @Autowired
     private InformatikRepository informatikRepository;
 
-    @Autowired
     private ArchitekturRepository architekturRepository;
 
-    @Autowired
     private WirtschaftRepository wirtschaftRepository;
 
     private ModelMapper modelMapper;
+    @Autowired
+    public DatasetService(KostbarRepository kostbarRepository, InformatikRepository informatikRepository, ArchitekturRepository architekturRepository, WirtschaftRepository wirtschaftRepository, ModelMapper modelMapper) {
+        this.kostbarRepository = kostbarRepository;
+        this.informatikRepository = informatikRepository;
+        this.architekturRepository = architekturRepository;
+        this.wirtschaftRepository = wirtschaftRepository;
         this.modelMapper = modelMapper;
+    }
+
     public Map<String, String> typeAbrevations = Map.ofEntries(
         Map.entry("temperature", "temp"),
         Map.entry("humidity", "hum")
