@@ -5,13 +5,23 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.schaefersm.chartissimo.repository.ArchitekturRepository;
 import com.schaefersm.chartissimo.repository.InformatikRepository;
 import com.schaefersm.chartissimo.repository.KostbarRepository;
 import com.schaefersm.chartissimo.repository.WirtschaftRepository;
+import com.schaefersm.chartissimo.Location;
+import com.schaefersm.chartissimo.dto.DailyDatasetDTO;
+import com.schaefersm.chartissimo.dto.DatasetDTO;
+import com.schaefersm.chartissimo.dto.DatasetResponseDTO;
+import com.schaefersm.chartissimo.dto.HourlyDatasetDTO;
+import com.schaefersm.chartissimo.model.Dataset;
+import com.schaefersm.chartissimo.repository.*;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +40,8 @@ public class DatasetService {
     @Autowired
     private WirtschaftRepository wirtschaftRepository;
 
+    private ModelMapper modelMapper;
+        this.modelMapper = modelMapper;
     public Map<String, String> typeAbrevations = Map.ofEntries(
         Map.entry("temperature", "temp"),
         Map.entry("humidity", "hum")
@@ -50,22 +62,24 @@ public class DatasetService {
         return String.format("%s_%s", location, typeAbrevations.get(dataType));
     }
 
-    public Map<String, Object> getDatasets(String dataType, LocalDate date, String location, int hour) {
-        Map<String, Object> response = new HashMap<>();
-        if (dataType.equals("comparison")) {
-            List<List<Map<String, Integer>>> datasetList = new ArrayList<>();
-            List<Map<String, Integer>> tempDataset = getFetchedDatasets(String.format("%s_temp", location), date, location, hour);
-            datasetList.add(tempDataset);
-            List<Map<String, Integer>> humDataset = getFetchedDatasets(String.format("%s_hum", location), date, location, hour);
-            datasetList.add(humDataset);
-            response.put("data", datasetList);
-            return response;
-        } else {
-            String host = generateHost(dataType, location);
-            List<Map<String, Integer>> realDataset = getFetchedDatasets(host, date, location, hour);
-            response.put("data", realDataset);
-            return response;
+    public DatasetResponseDTO getDatasets(String dataType, LocalDate date, String location, int hour) {
+        DatasetResponseDTO datasetResponseDTO = new DatasetResponseDTO();
+        try {
+            if (dataType.equals("comparison")) {
+                List<? extends DatasetDTO> tempDataset = fetchDatasets(String.format("%s_temp", location), date, location, hour);
+                List<? extends DatasetDTO> humDataset = fetchDatasets(String.format("%s_hum", location), date, location, hour);
+                datasetResponseDTO.addDataset(tempDataset);
+                datasetResponseDTO.addDataset(humDataset);
+            } else {
+                String host = generateHost(dataType, location);
+                List<? extends DatasetDTO> dataset = fetchDatasets(host, date, location, hour);
+                datasetResponseDTO.addDataset(dataset);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            datasetResponseDTO.setErrorMessage(e.getMessage());
         }
+        return datasetResponseDTO;
     }
 
     public List<Map<String, Integer>> getFetchedDatasets(String host, LocalDate date, String location, int hour) {
