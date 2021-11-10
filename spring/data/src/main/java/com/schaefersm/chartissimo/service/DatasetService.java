@@ -3,7 +3,6 @@ package com.schaefersm.chartissimo.service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -33,6 +32,9 @@ public class DatasetService {
     private WirtschaftRepository wirtschaftRepository;
 
     private ModelMapper modelMapper;
+
+    private final int RESET_HOUR = 25;
+
     @Autowired
     public DatasetService(KostbarRepository kostbarRepository, InformatikRepository informatikRepository, ArchitekturRepository architekturRepository, WirtschaftRepository wirtschaftRepository, ModelMapper modelMapper) {
         this.kostbarRepository = kostbarRepository;
@@ -47,16 +49,6 @@ public class DatasetService {
         Map.entry("humidity", "hum")
     );
 
-    public List<Map<String, Integer>> processData(List<Integer[]> fetchedData, String timeValue) {
-        List<Map<String, Integer>> processedData = new ArrayList<>();
-        for (Integer[] rows : fetchedData) {
-                Map<String, Integer> wirtschaftValue = new HashMap<>();
-                wirtschaftValue.put(timeValue, rows[0]);
-                wirtschaftValue.put("value", rows[1]);
-                processedData.add(wirtschaftValue);
-            }
-        return processedData;
-    }
 
     public String generateHost(String dataType, String location) {
         return String.format("%s_%s", location, typeAbrevations.get(dataType));
@@ -82,57 +74,50 @@ public class DatasetService {
         return datasetResponseDTO;
     }
 
-    public List<Map<String, Integer>> getFetchedDatasets(String host, LocalDate date, String location, int hour) {
-        List<Map<String, Integer>> processedData = new ArrayList<>();
-        List<Integer[]> fetchedData = new ArrayList<>();
-        switch (location) {
-            case "wirtschaft": 
-                if (hour == 25) {
-                    fetchedData = wirtschaftRepository.findDailyDataset(host, date);
-                    processedData = fetchedData.isEmpty() ? new ArrayList<>() : processData(fetchedData, "hour");
-                } else {
-                    fetchedData = wirtschaftRepository.findHourlyDataset(host, date, hour);
-                    processedData = fetchedData.isEmpty() ? new ArrayList<>() : processData(fetchedData, "minute");
-                }
-            break;
 
-            case "architektur": 
-                if (hour == 25) {
-                    fetchedData = architekturRepository.findDailyDataset(host, date);
-                    processedData = fetchedData.isEmpty() ? new ArrayList<>() : processData(fetchedData, "hour");
+    public List<? extends DatasetDTO> fetchDatasets(String host, LocalDate date, String location, int hour) throws Exception {
+        List<? extends Dataset> fetchedData = new ArrayList<>();
+        switch (Location.valueOf(location.toUpperCase(Locale.ROOT))) {
+            case ARCHITEKTUR:
+                if (hour == RESET_HOUR) {
+                    fetchedData = architekturRepository.findAllByHostAndDatumAndMinute(host, date);
                 } else {
-                    fetchedData = architekturRepository.findHourlyDataset(host, date, hour);
-                    processedData = fetchedData.isEmpty() ? new ArrayList<>() : processData(fetchedData, "minute");
+                    fetchedData = architekturRepository.findAllByHostAndDatumAndHour(host, date, hour);
                 }
-            break;
-
-            case "informatik":
-                if (hour == 25) {
-                    fetchedData = informatikRepository.findDailyDataset(host, date);
-                    processedData = fetchedData.isEmpty() ? new ArrayList<>() : processData(fetchedData, "hour");
+                break;
+            case INFORMATIK:
+                if (hour == RESET_HOUR) {
+                    fetchedData = informatikRepository.findAllByHostAndDatumAndMinute(host, date);
                 } else {
-                    fetchedData = informatikRepository.findHourlyDataset(host, date, hour);
-                    processedData = fetchedData.isEmpty() ? new ArrayList<>() : processData(fetchedData, "minute");
+                    fetchedData = informatikRepository.findAllByHostAndDatumAndHour(host, date, hour);
                 }
-            break;
-
-            
-            case "kostbar":
-                if (hour == 25) {
-                    fetchedData = kostbarRepository.findDailyDataset(host, date);
-                    processedData = fetchedData.isEmpty() ? new ArrayList<>() : processData(fetchedData, "hour");
+                break;
+            case KOSTBAR:
+                if (hour == RESET_HOUR) {
+                    fetchedData = kostbarRepository.findAllByHostAndDatumAndMinute(host, date);
                 } else {
-                    fetchedData = kostbarRepository.findHourlyDataset(host, date, hour);
-                    processedData = fetchedData.isEmpty() ? new ArrayList<>() : processData(fetchedData, "minute");
+                    fetchedData = kostbarRepository.findAllByHostAndDatumAndHour(host, date, hour);
                 }
-            break;
-            
+                break;
+            case WIRTSCHAFT:
+                if (hour == RESET_HOUR) {
+                    fetchedData = wirtschaftRepository.findAllByHostAndDatumAndMinute(host, date);
+                } else {
+                    fetchedData = wirtschaftRepository.findAllByHostAndDatumAndHour(host, date, hour);
+                }
+                break;
+            default:
+                break;
         }
-        if (processedData.isEmpty()) {
-            return null;
+        if (fetchedData.isEmpty()) {
+            throw new Exception("No data available");
         }
-        else {
-            return processedData;
+        if (hour == 25) {
+            return fetchedData.stream().map(dataset -> modelMapper.map(dataset, DailyDatasetDTO.class))
+                    .collect(Collectors.toList());
+        } else {
+            return fetchedData.stream().map(dataset -> modelMapper.map(dataset, HourlyDatasetDTO.class))
+                    .collect(Collectors.toList());
         }
     }
 
