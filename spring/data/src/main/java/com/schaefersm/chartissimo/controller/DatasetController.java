@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
+import com.schaefersm.chartissimo.dto.DatasetResponseDTO;
 import com.schaefersm.chartissimo.service.DatasetService;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +27,8 @@ public class DatasetController {
 
 	private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-
-    @GetMapping("/{dataType}")
-	public ResponseEntity<Map<String, Object>> getDatasets(
+	@GetMapping("/categories/{dataType}")
+	public ResponseEntity<DatasetResponseDTO> getDatasets(
 		@PathVariable("dataType") String dataType, 
 		@RequestParam(required = false) String date,
 		@RequestParam(required = false) String location,
@@ -36,8 +36,8 @@ public class DatasetController {
 	{
 
 		LocalDate parsedDate = LocalDate.parse(date, dateFormatter);
-		Map<String, Object> response = datasetService.getDatasets(dataType, parsedDate, location, hour);
-		if (response.get("errorMessage") == null && response != null) {
+		DatasetResponseDTO response = datasetService.getDatasets(dataType, parsedDate, location, hour);
+		if (response != null && response.getErrorMessage() == null) {
 			return ResponseEntity.status(HttpStatus.OK).body(response);
 		} else {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);

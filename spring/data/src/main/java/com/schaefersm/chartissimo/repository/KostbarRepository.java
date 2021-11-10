@@ -9,10 +9,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 
-public interface KostbarRepository extends CrudRepository<Kostbar, Integer> {
-    @Query("SELECT k.hour, k.value from Kostbar k WHERE k.host = :host AND k.datum = :date and k.minute = 0")
-    List<Integer[]> findDailyDataset(String host, LocalDate date);
+public interface KostbarRepository extends CrudRepository<Kostbar , Integer> {
 
-    @Query("SELECT k.minute, k.value from Kostbar k WHERE k.host = :host AND k.datum = :date and k.hour = :hour")
-    List<Integer[]> findHourlyDataset(String host, LocalDate date, int hour);
+    List<Kostbar> findAllByHostAndDatumAndHour(String host, LocalDate date, int hour);
+
+    @Query(value = "SELECT new Kostbar (k.value, k.hour) from Kostbar k WHERE k.host = :host AND k.datum = :date and k.minute = 0")
+    List<Kostbar> findAllByHostAndDatumAndMinute(String host, LocalDate date);
+
 }
