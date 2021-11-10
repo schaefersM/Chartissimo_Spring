@@ -9,7 +9,7 @@ import javax.persistence.Id;
 
 
 @Entity
-public class Informatik {
+public class Informatik extends Dataset {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,51 +25,11 @@ public class Informatik {
 
     private LocalDate datum;
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public void setHost(String host) {
-        this.host = host;
-    }
-
-    public int getValue() {
-        return value;
-    }
-
-    public void setValue(int value) {
+    public Informatik(int value, int hour) {
         this.value = value;
-    }
-
-    public int getHour() {
-        return hour;
-    }
-
-    public void setHour(int hour) {
         this.hour = hour;
     }
 
-    public int getMinute() {
-        return minute;
-    }
 
-    public void setMinute(int minute) {
-        this.minute = minute;
-    }
-
-    public LocalDate getDate() {
-        return datum;
-    }
-
-    public void setDate(LocalDate datum) {
-        this.datum = datum;
-    }
+    public Informatik() {}
 }

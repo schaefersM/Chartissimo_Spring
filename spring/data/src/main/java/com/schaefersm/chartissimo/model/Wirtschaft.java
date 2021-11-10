@@ -1,88 +1,41 @@
 package com.schaefersm.chartissimo.model;
 
+import lombok.Data;
+import lombok.ToString;
+
 import java.time.LocalDate;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
-public class Wirtschaft {
+@Data
+@Table(name = "Wirtschaft")
+public class Wirtschaft extends Dataset{
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @Column(name = "host")
     private String host;
 
+    @Column(name = "value")
     private int value;
 
+    @Column(name = "hour")
     private int hour;
 
-    @Override
-    public String toString() {
-        return "Kostbar [datum=" + datum + ", host=" + host + "]";
-    }
-
-    public Wirtschaft(String host, int value, int hour, int minute, LocalDate datum) {
-        this.host = host;
-        this.value = value;
-        this.hour = hour;
-        this.minute = minute;
-        this.datum = datum;
-    }
-
-    public Wirtschaft() {
-    }
-
+    @Column(name = "minute")
     private int minute;
 
+    @Column(name = "datum")
     private LocalDate datum;
 
-    public LocalDate getDatum() {
-        return datum;
-    }
-
-    public void setDatum(LocalDate datum) {
-        this.datum = datum;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getHost() {
-        return host;
-    }
-
-    public void setHost(String host) {
-        this.host = host;
-    }
-
-    public int getValue() {
-        return value;
-    }
-
-    public void setValue(int value) {
+    public Wirtschaft(int value, int hour) {
         this.value = value;
-    }
-
-    public int getHour() {
-        return hour;
-    }
-
-    public void setHour(int hour) {
         this.hour = hour;
     }
 
-    public int getMinute() {
-        return minute;
-    }
+    public Wirtschaft(){}
 
-    public void setMinute(int minute) {
-        this.minute = minute;
-    }}
+}
