@@ -2,15 +2,21 @@ package com.schaefersm.auth.service;
 
 import com.schaefersm.auth.exception.JwtTokenMalformedException;
 import com.schaefersm.auth.exception.JwtTokenMissingException;
+import com.schaefersm.auth.exception.UserNotFoundException;
 import com.schaefersm.auth.model.JwtToken;
+import com.schaefersm.auth.model.User;
 import com.schaefersm.auth.repository.JwtRepository;
+import com.schaefersm.auth.repository.UserRepository;
+import com.schaefersm.auth.util.CookieUtil;
 import com.schaefersm.auth.util.JwtUtil;
 import io.jsonwebtoken.*;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import javax.servlet.http.Cookie;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -45,19 +51,39 @@ public class RefreshService {
         }
     }
 
+    public User getUserDetails(String token) {
+        Claims claims = jwtUtil.getRefreshClaims(token);
+        User user = userRepository.findByName(claims.getSubject());
+        if (user == null) {
+            throw new UserNotFoundException();
+        }
+        return user;
+    }
 
-//    public void invalidateToken(String token) {
-//        Claims body = jwtUtil.getRefreshClaims(token);
-//        Optional<JwtToken> jwtToken = jwtRepository.findJwtTokenByToken(token);
-//        if (jwtToken.isPresent()) {
-//
-//        }
-//        long nowMillis = System.currentTimeMillis();
-//        long expMillis = nowMillis + tokenValidity;
-//        Date exp = new Date(expMillis);
-//        return Jwts.builder().setClaims(claims).setIssuedAt(new Date(nowMillis)).setExpiration(exp)
-//                .signWith(SignatureAlgorithm.HS512, jwtSecret).compact();
-//
-//    }
+    public String generateNewRefreshToken(String refreshToken) {
+        Claims claims = jwtUtil.getRefreshClaims(refreshToken);
+        log.info("Refreshing refreshToken of user " + claims.getSubject());
+        String newRefreshToken = jwtUtil.generateRefreshToken(claims.getSubject(), claims.getExpiration());
+        Optional<JwtToken> jwtToken = jwtRepository.findJwtTokenByToken(refreshToken);
+        if (jwtToken.isPresent()) {
+            jwtToken.get().setToken(newRefreshToken);
+            jwtRepository.save(jwtToken.get());
+        }
+        return newRefreshToken;
+    }
+
+    public Map<String, Cookie> generateCookies(String refreshToken, String newRefreshToken) {
+        Map<String, Cookie> cookies = new HashMap<>();
+        Claims claims = jwtUtil.getRefreshClaims(refreshToken);
+        String accessToken = jwtUtil.generateAccessToken(claims.getSubject());
+        Cookie accessCookie = cookieUtil.getAccessCookie(accessToken);
+        Cookie refreshCookie = cookieUtil.getRefreshCookie(newRefreshToken);
+        cookies.put("access", accessCookie);
+        cookies.put("refresh", refreshCookie);
+        return cookies;
+    }
+
+
+
 
 }
