@@ -9,7 +9,8 @@ import com.schaefersm.auth.repository.JwtRepository;
 import com.schaefersm.auth.repository.UserRepository;
 import com.schaefersm.auth.util.CookieUtil;
 import com.schaefersm.auth.util.JwtUtil;
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,7 @@ public class RefreshService {
 
     public void checkToken(String token) {
         Optional<JwtToken> jwtToken = jwtRepository.findJwtTokenByToken(token);
-        if(jwtToken.isPresent()) {
+        if (jwtToken.isPresent()) {
             try {
                 log.info("Validating Refreshtoken...");
                 jwtUtil.validateToken(token);
@@ -85,8 +86,6 @@ public class RefreshService {
         cookies.put("refresh", refreshCookie);
         return cookies;
     }
-
-
 
 
 }

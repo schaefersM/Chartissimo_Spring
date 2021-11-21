@@ -3,7 +3,6 @@ package com.schaefersm.auth.service;
 
 import com.schaefersm.auth.exception.EmailAlreadyExistsException;
 import com.schaefersm.auth.exception.UsernameAlreadyExistsException;
-import com.schaefersm.auth.exception.ValidationException;
 import com.schaefersm.auth.model.User;
 import com.schaefersm.auth.repository.UserRepository;
 import com.schaefersm.auth.util.ValidationUtil;

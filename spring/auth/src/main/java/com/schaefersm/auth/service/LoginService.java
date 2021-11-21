@@ -2,8 +2,6 @@ package com.schaefersm.auth.service;
 
 import com.schaefersm.auth.exception.PasswordIsWrongException;
 import com.schaefersm.auth.exception.UserNotFoundException;
-import com.schaefersm.auth.exception.ValidationException;
-import com.schaefersm.auth.model.AuthResponse;
 import com.schaefersm.auth.model.AuthenticationRequest;
 import com.schaefersm.auth.model.JwtToken;
 import com.schaefersm.auth.model.User;
@@ -12,7 +10,6 @@ import com.schaefersm.auth.repository.UserRepository;
 import com.schaefersm.auth.util.CookieUtil;
 import com.schaefersm.auth.util.JwtUtil;
 import com.schaefersm.auth.util.ValidationUtil;
-import lombok.NonNull;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

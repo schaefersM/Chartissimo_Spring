@@ -1,22 +1,14 @@
 package com.schaefersm.auth.util;
 
-import java.util.*;
-
 import com.schaefersm.auth.exception.JwtTokenMalformedException;
 import com.schaefersm.auth.exception.JwtTokenMissingException;
-
 import com.schaefersm.auth.repository.JwtRepository;
+import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.SignatureException;
-import io.jsonwebtoken.UnsupportedJwtException;
+import java.util.Date;
 
 @Component
 public class JwtUtil {
@@ -59,8 +51,6 @@ public class JwtUtil {
         }
         return null;
     }
-
-
 
     public String generateAccessToken(String id) {
         Claims claims = Jwts.claims().setSubject(id);

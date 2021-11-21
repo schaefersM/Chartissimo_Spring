@@ -1,7 +1,5 @@
 package com.schaefersm.auth.exceptionHandler;
 
-import com.schaefersm.auth.exception.JwtTokenMalformedException;
-import com.schaefersm.auth.exception.JwtTokenMissingException;
 import com.schaefersm.auth.exception.ValidationException;
 import com.schaefersm.auth.model.BaseResponse;
 import org.springframework.http.HttpStatus;

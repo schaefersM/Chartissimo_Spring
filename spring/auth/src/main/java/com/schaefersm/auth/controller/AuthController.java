@@ -1,27 +1,27 @@
 package com.schaefersm.auth.controller;
 
 import com.schaefersm.auth.dto.AuthResponseDTO;
-import com.schaefersm.auth.model.*;
-import com.schaefersm.auth.repository.JwtRepository;
-import com.schaefersm.auth.repository.UserRepository;
+import com.schaefersm.auth.model.AuthenticationRequest;
+import com.schaefersm.auth.model.BaseResponse;
+import com.schaefersm.auth.model.RegisterRequest;
+import com.schaefersm.auth.model.User;
 import com.schaefersm.auth.service.LoginService;
 import com.schaefersm.auth.service.LogoutService;
 import com.schaefersm.auth.service.RefreshService;
 import com.schaefersm.auth.service.RegisterService;
-import com.schaefersm.auth.util.CookieUtil;
-import com.schaefersm.auth.util.JwtUtil;
-import io.jsonwebtoken.Claims;
 import lombok.extern.java.Log;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
-import java.util.Optional;
 
 @Log
 @RestController

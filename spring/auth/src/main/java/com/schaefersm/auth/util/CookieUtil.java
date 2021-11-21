@@ -1,6 +1,5 @@
 package com.schaefersm.auth.util;
 
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -14,8 +13,6 @@ public class CookieUtil {
 
     @Value("${cookieName.refresh}")
     private String refreshCookieName;
-
-
 
     @Value("${validity.refresh}")
     private int refreshValidity;

@@ -15,17 +15,17 @@ public class LoginExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(PasswordIsWrongException.class)
     public ResponseEntity<BaseResponse> handlePasswordIsWrongException(PasswordIsWrongException e) {
-        return new ResponseEntity<>(new BaseResponse(e.getMessage()),HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(new BaseResponse(e.getMessage()), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<BaseResponse> handleUserNotFoundException(UserNotFoundException e) {
-        return new ResponseEntity<>(new BaseResponse(e.getMessage()),HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(new BaseResponse(e.getMessage()), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ResponseEntity<BaseResponse> handleEmailAlreadyExistsException(EmailAlreadyExistsException e) {
-        return new ResponseEntity<>(new BaseResponse(e.getMessage()),HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(new BaseResponse(e.getMessage()), HttpStatus.NOT_FOUND);
     }
 
 }

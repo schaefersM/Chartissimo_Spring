@@ -9,7 +9,6 @@ public class AuthResponse {
 
     private User user;
     private boolean isAuthenticated = true;
-
     public AuthResponse(User authenticatedUser) {
         this.user = authenticatedUser;
     }
