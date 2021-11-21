@@ -39,6 +39,10 @@ public class GatewayApplication {
                 .filters(f -> f.filter(filter))
                 .uri("http://localhost:5000"))
                 .route(routeSpec -> routeSpec
+                .path("/api/user/**")
+                .filters(f -> f.filter(filter))
+                .uri("http://localhost:6000"))
+                .build();
     }
 
 
