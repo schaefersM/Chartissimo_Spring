@@ -1,10 +1,12 @@
 package com.schaefersm.auth.util;
 
-import java.util.Date;
+import java.util.*;
 
 import com.schaefersm.auth.exception.JwtTokenMalformedException;
 import com.schaefersm.auth.exception.JwtTokenMissingException;
 
+import com.schaefersm.auth.repository.JwtRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -19,16 +21,28 @@ import io.jsonwebtoken.UnsupportedJwtException;
 @Component
 public class JwtUtil {
 
-    @Value("${jwt.secret}")
-    private String jwtSecret;
+    @Value("${secret.access}")
+    private String accessSecret;
 
-    @Value("${jwt.token.validity}")
-    private long tokenValidity;
+    @Value("${secret.refresh}")
+    private String refreshSecret;
 
-    public Claims getClaims(final String token) {
+    @Value("${validity.refresh}")
+    private long refreshValidity;
+
+    @Value("${validity.access}")
+    private long accessValidity;
+
+    JwtRepository jwtRepository;
+
+    @Autowired
+    public JwtUtil(JwtRepository jwtRepository) {
+        this.jwtRepository = jwtRepository;
+    }
+
+    public Claims getAccessClaims(final String token) {
         try {
-            Claims body = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();
-            System.out.println(body);
+            Claims body = Jwts.parser().setSigningKey(accessSecret).parseClaimsJws(token).getBody();
             return body;
         } catch (Exception e) {
             System.out.println(e.getMessage() + " => " + e);
@@ -36,25 +50,68 @@ public class JwtUtil {
         return null;
     }
 
-    public String generateToken(String id) {
-        Claims claims = Jwts.claims().setSubject(id);
-        long nowMillis = System.currentTimeMillis();
-        long expMillis = nowMillis + tokenValidity;
-        Date exp = new Date(expMillis);
-        return Jwts.builder().setClaims(claims).setIssuedAt(new Date(nowMillis)).setExpiration(exp)
-                .signWith(SignatureAlgorithm.HS512, jwtSecret).compact();
+    public Claims getRefreshClaims(final String token) {
+        try {
+            Claims body = Jwts.parser().setSigningKey(refreshSecret).parseClaimsJws(token).getBody();
+            return body;
+        } catch (Exception e) {
+            System.out.println(e.getMessage() + " => " + e);
+        }
+        return null;
     }
 
+
+
+    public String generateAccessToken(String id) {
+        Claims claims = Jwts.claims().setSubject(id);
+        long nowMillis = System.currentTimeMillis();
+        long expMillis = nowMillis + 1000 * accessValidity;
+        Date exp = new Date(expMillis);
+        return Jwts.builder().setClaims(claims).setIssuedAt(new Date(nowMillis)).setExpiration(exp)
+                .signWith(SignatureAlgorithm.HS512, accessSecret).compact();
+    }
+
+    public String generateRefreshToken(String id) {
+        Claims claims = Jwts.claims().setSubject(id);
+        long nowMillis = System.currentTimeMillis();
+        long expMillis = nowMillis + 1000 * refreshValidity;
+        Date exp = new Date(expMillis);
+        return Jwts.builder().setClaims(claims).setIssuedAt(new Date(nowMillis)).setExpiration(exp)
+                .signWith(SignatureAlgorithm.HS512, refreshSecret).compact();
+    }
+
+    public String generateRefreshToken(String id, Date expirationDate) {
+        Claims claims = Jwts.claims().setSubject(id);
+        long nowMillis = System.currentTimeMillis();
+        return Jwts.builder().setClaims(claims).setIssuedAt(new Date(nowMillis)).setExpiration(expirationDate)
+                .signWith(SignatureAlgorithm.HS512, refreshSecret).compact();
+    }
+
+//    public String generateMultiToken(String... values) {
+//        String subjects = String.join(";", values);
+//        Claims claims = Jwts.claims().setSubject(subjects);
+//        long nowMillis = System.currentTimeMillis();
+//        long expMillis = nowMillis + tokenValidity;
+//        Date exp = new Date(expMillis);
+//        return Jwts.builder().setClaims(claims).setIssuedAt(new Date(nowMillis)).setExpiration(exp)
+//                .signWith(SignatureAlgorithm.HS512, accessSecret).compact();
+//    }
+
+//    public Map<String, String> getSubjectsFromMultiToken(String value) {
+//        Map<String, String> subjects = new HashMap<>();
+//        String[] splittedValues = value.split(";");
+//        subjects.put("username", splittedValues[0]);
+//        subjects.put("email", splittedValues[1]);
+//        return subjects;
+//    }
+
     public void validateToken(final String token) throws JwtTokenMalformedException, JwtTokenMissingException {
-        System.out.println("validation");
         try {
-            Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token);
+            Jwts.parser().setSigningKey(refreshSecret).parseClaimsJws(token);
         } catch (SignatureException ex) {
             throw new JwtTokenMalformedException("Invalid JWT signature");
         } catch (MalformedJwtException ex) {
             throw new JwtTokenMalformedException("Invalid JWT token");
-        } catch (ExpiredJwtException ex) {
-            throw new JwtTokenMalformedException("Expired JWT token");
         } catch (UnsupportedJwtException ex) {
             throw new JwtTokenMalformedException("Unsupported JWT token");
         } catch (IllegalArgumentException ex) {
