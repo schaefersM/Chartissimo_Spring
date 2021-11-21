@@ -9,6 +9,13 @@ import javax.servlet.http.Cookie;
 @Component
 public class CookieUtil {
 
+    @Value("${cookieName.access}")
+    private String accessCookieName;
+
+    @Value("${cookieName.refresh}")
+    private String refreshCookieName;
+
+
 
     @Value("${validity.refresh}")
     private int refreshValidity;
@@ -17,7 +24,7 @@ public class CookieUtil {
     private int accessValidity;
 
     public Cookie getAccessCookie(String value) {
-        Cookie cookie = new Cookie("accessToken", value);
+        Cookie cookie = new Cookie(accessCookieName, value);
         cookie.setHttpOnly(true);
         cookie.setMaxAge(accessValidity);
         cookie.setSecure(false);
@@ -26,7 +33,7 @@ public class CookieUtil {
     }
 
     public Cookie getRefreshCookie(String value) {
-        Cookie cookie = new Cookie("refreshToken", value);
+        Cookie cookie = new Cookie(refreshCookieName, value);
         cookie.setHttpOnly(true);
         cookie.setMaxAge(refreshValidity);
         cookie.setSecure(false);

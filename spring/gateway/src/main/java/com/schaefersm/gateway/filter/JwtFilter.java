@@ -5,6 +5,7 @@ import com.schaefersm.gateway.exception.JwtTokenMissingException;
 import com.schaefersm.gateway.util.JwtUtil;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.http.HttpStatus;
@@ -21,8 +22,18 @@ import java.util.function.Predicate;
 @Component
 public class JwtFilter implements GatewayFilter {
 
-	@Autowired
+	@Value("${cookieName.access}")
+	private String accessCookieName;
+
+	@Value("${cookieName.refresh}")
+	private String refreshCookieName;
+
 	private JwtUtil jwtUtil;
+
+	@Autowired
+	public JwtFilter(JwtUtil jwtUtil) {
+		this.jwtUtil = jwtUtil;
+	}
 
 	@Override
 	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -34,10 +45,10 @@ public class JwtFilter implements GatewayFilter {
 				.noneMatch(uri -> r.getURI().getPath().contains(uri));
 
 		if (isApiSecured.test(request)) {
-			if (request.getCookies().get("accessToken") != null) {
+			if (request.getCookies().get(accessCookieName) != null) {
 				try {
 					log.info("validate access!");
-					String token = request.getCookies().get("accessToken").get(0).getValue();
+					String token = request.getCookies().get(accessCookieName).get(0).getValue();
 					jwtUtil.validateAccessToken(token);
 					return chain.filter(exchange);
 				} catch (JwtTokenMalformedException | JwtTokenMissingException e) {
@@ -55,7 +66,7 @@ public class JwtFilter implements GatewayFilter {
 	private Mono<Void> validateRefreshToken(ServerWebExchange exchange, ServerHttpRequest request) {
 		try {
 			log.info("Validate refresh!");
-			String token = request.getCookies().get("refreshToken").get(0).getValue();
+			String token = request.getCookies().get(refreshCookieName).get(0).getValue();
 			jwtUtil.validateRefreshToken(token);
 			ServerHttpResponse response = exchange.getResponse();
 			response.setStatusCode(HttpStatus.UNAUTHORIZED);
