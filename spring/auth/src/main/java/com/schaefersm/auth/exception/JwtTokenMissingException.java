@@ -1,8 +1,6 @@
 package com.schaefersm.auth.exception;
 
-import javax.naming.AuthenticationException;
-
-public class JwtTokenMissingException extends AuthenticationException {
+public class JwtTokenMissingException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
