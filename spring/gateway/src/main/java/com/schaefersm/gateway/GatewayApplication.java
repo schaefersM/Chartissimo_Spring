@@ -23,25 +23,17 @@ public class GatewayApplication {
         return rlb
                 .routes()
                 .route(routeSpec -> routeSpec
-                .path("/auth/login")
-                .filters(f -> f.filter(filter))
-                .uri("http://localhost:6000"))
+                        .path("/auth/**")
+                        .filters(f -> f.filter(filter))
+                        .uri("http://localhost:6000"))
                 .route(routeSpec -> routeSpec
-                .path("/auth/refresh")
-                .filters(f -> f.filter(filter))
-                .uri("http://localhost:6000"))
+                        .path("/api/data/**")
+                        .filters(f -> f.filter(filter))
+                        .uri("http://localhost:5000"))
                 .route(routeSpec -> routeSpec
-                .path("/auth/register")
-                .filters(f -> f.filter(filter))
-                .uri("http://localhost:6000"))
-                .route(routeSpec -> routeSpec
-                .path("/api/data/**")
-                .filters(f -> f.filter(filter))
-                .uri("http://localhost:5000"))
-                .route(routeSpec -> routeSpec
-                .path("/api/user/**")
-                .filters(f -> f.filter(filter))
-                .uri("http://localhost:6000"))
+                        .path("/api/user/**")
+                        .filters(f -> f.filter(filter))
+                        .uri("http://localhost:6000"))
                 .build();
     }
 

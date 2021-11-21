@@ -5,6 +5,7 @@ import com.schaefersm.gateway.exception.JwtTokenMissingException;
 import com.schaefersm.gateway.util.JwtUtil;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.http.HttpStatus;
@@ -21,53 +22,60 @@ import java.util.function.Predicate;
 @Component
 public class JwtFilter implements GatewayFilter {
 
-	@Autowired
-	private JwtUtil jwtUtil;
+    @Value("${cookieName.access}")
+    private String accessCookieName;
 
-	@Override
-	public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-		ServerHttpRequest request = exchange.getRequest();
+    @Value("${cookieName.refresh}")
+    private String refreshCookieName;
 
-		final List<String> apiEndpoints = List.of("/register", "/login", "/api/data", "/refresh");
+    private JwtUtil jwtUtil;
 
-		Predicate<ServerHttpRequest> isApiSecured = r -> apiEndpoints.stream()
-				.noneMatch(uri -> r.getURI().getPath().contains(uri));
+    @Autowired
+    public JwtFilter(JwtUtil jwtUtil) {
+        this.jwtUtil = jwtUtil;
+    }
 
-		if (isApiSecured.test(request)) {
-			if (request.getCookies().get("accessToken") != null) {
-				try {
-					log.info("validate access!");
-					String token = request.getCookies().get("accessToken").get(0).getValue();
-					jwtUtil.validateAccessToken(token);
-					return chain.filter(exchange);
-				} catch (JwtTokenMalformedException | JwtTokenMissingException e) {
-					log.info("Invalid access token! " + e.getMessage());
-					return validateRefreshToken(exchange, request);
-				}
-			} else {
-				return validateRefreshToken(exchange, request);
-			}
-		}
+    @Override
+    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        ServerHttpRequest request = exchange.getRequest();
 
-		return chain.filter(exchange);
-	}
+        final List<String> apiEndpoints = List.of("/register", "/login", "/api/data", "/refresh");
 
-	private Mono<Void> validateRefreshToken(ServerWebExchange exchange, ServerHttpRequest request) {
-		try {
-			log.info("Validate refresh!");
-			String token = request.getCookies().get("refreshToken").get(0).getValue();
-			jwtUtil.validateRefreshToken(token);
-			ServerHttpResponse response = exchange.getResponse();
-			response.setStatusCode(HttpStatus.UNAUTHORIZED);
-			return response.setComplete();
+        Predicate<ServerHttpRequest> isApiSecured = r -> apiEndpoints.stream()
+                .noneMatch(uri -> r.getURI().getPath().contains(uri));
 
-		} catch (JwtTokenMalformedException | JwtTokenMissingException e) {
-			log.info("Invalid refresh token! " + e.getMessage());
-			log.info("Denying user!");
-			ServerHttpResponse response = exchange.getResponse();
-			response.setStatusCode(HttpStatus.FORBIDDEN);
-			return response.setComplete();
-		}
-	}
+        if (isApiSecured.test(request)) {
+            if (request.getCookies().get(accessCookieName) != null) {
+                try {
+                    log.info("validate access!");
+                    String token = request.getCookies().get(accessCookieName).get(0).getValue();
+                    jwtUtil.validateAccessToken(token);
+                    return chain.filter(exchange);
+                } catch (JwtTokenMalformedException | JwtTokenMissingException e) {
+                    log.info("Invalid access token! " + e.getMessage());
+                    return validateRefreshToken(exchange, request);
+                }
+            } else {
+                return validateRefreshToken(exchange, request);
+            }
+        }
+        return chain.filter(exchange);
+    }
 
+    private Mono<Void> validateRefreshToken(ServerWebExchange exchange, ServerHttpRequest request) {
+        try {
+            log.info("Validate refresh!");
+            String token = request.getCookies().get(refreshCookieName).get(0).getValue();
+            jwtUtil.validateRefreshToken(token);
+            ServerHttpResponse response = exchange.getResponse();
+            response.setStatusCode(HttpStatus.UNAUTHORIZED);
+            return response.setComplete();
+        } catch (JwtTokenMalformedException | JwtTokenMissingException e) {
+            log.info("Invalid refresh token! " + e.getMessage());
+            log.info("Denying user!");
+            ServerHttpResponse response = exchange.getResponse();
+            response.setStatusCode(HttpStatus.FORBIDDEN);
+            return response.setComplete();
+        }
+    }
 }
