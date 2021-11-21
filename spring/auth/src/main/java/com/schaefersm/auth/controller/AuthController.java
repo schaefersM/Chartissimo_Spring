@@ -66,7 +66,7 @@ public class AuthController {
     }
 
     @PostMapping("/auth/refresh")
-    public ResponseEntity<AuthResponseDTO> refresh(HttpServletResponse response, @CookieValue("refreshToken") String refreshToken) {
+    public ResponseEntity<AuthResponseDTO> refresh(HttpServletResponse response, @CookieValue("refreshCookie") String refreshToken) {
         refreshService.checkToken(refreshToken);
         Claims claims = jwtUtil.getRefreshClaims(refreshToken);
         log.info("Refreshing refreshToken of user " + claims.getSubject());
@@ -94,7 +94,7 @@ public class AuthController {
     }
 
     @PostMapping("/auth/logout")
-    public ResponseEntity<?> logout(@CookieValue("refreshToken") String refreshToken) {
+    public ResponseEntity<?> logout(@CookieValue("refreshCookie") String refreshToken) {
         log.info("Logging out user...");
         Optional<JwtToken> jwtToken = jwtRepository.findJwtTokenByToken(refreshToken);
         if (jwtToken.isPresent()) {
