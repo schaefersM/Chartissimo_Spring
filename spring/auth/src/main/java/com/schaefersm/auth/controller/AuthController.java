@@ -5,6 +5,7 @@ import com.schaefersm.auth.model.*;
 import com.schaefersm.auth.repository.JwtRepository;
 import com.schaefersm.auth.repository.UserRepository;
 import com.schaefersm.auth.service.LoginService;
+import com.schaefersm.auth.service.LogoutService;
 import com.schaefersm.auth.service.RefreshService;
 import com.schaefersm.auth.service.RegisterService;
 import com.schaefersm.auth.util.CookieUtil;
@@ -41,6 +42,7 @@ public class AuthController {
     private RegisterService registerService;
 
     @Autowired
+    private LogoutService logoutService;
     private RefreshService refreshService;
 
     @Autowired
@@ -95,13 +97,7 @@ public class AuthController {
 
     @PostMapping("/auth/logout")
     public ResponseEntity<?> logout(@CookieValue("refreshCookie") String refreshToken) {
-        log.info("Logging out user...");
-        Optional<JwtToken> jwtToken = jwtRepository.findJwtTokenByToken(refreshToken);
-        if (jwtToken.isPresent()) {
-            jwtRepository.delete(jwtToken.get());
-            log.info("Jwt token deleted!");
-        }
-        log.info("User logged out successfully!");
+        logoutService.deleteJwtToken(refreshToken);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 }
