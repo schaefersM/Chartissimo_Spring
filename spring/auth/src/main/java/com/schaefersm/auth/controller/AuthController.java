@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
 import java.util.Optional;
 
 @Log
@@ -54,14 +55,10 @@ public class AuthController {
 
     @PostMapping("/auth/login")
     public ResponseEntity<AuthResponseDTO> login(@RequestBody AuthenticationRequest request, HttpServletResponse response) {
-        User user = loginService.login(request.getName(), request.getPassword());
-        String accessToken = jwtUtil.generateAccessToken(request.getName());
-        String refreshToken = jwtUtil.generateRefreshToken(request.getName());
-        jwtRepository.save(new JwtToken(jwtUtil.getRefreshClaims(refreshToken).getExpiration(), refreshToken));
-        Cookie accessCookie = cookieUtil.getAccessCookie(accessToken);
-        Cookie refreshCookie = cookieUtil.getRefreshCookie(refreshToken);
-        response.addCookie(accessCookie);
-        response.addCookie(refreshCookie);
+        User user = loginService.getUserDetails(request.getName(), request.getPassword());
+        Map<String, Cookie> cookies = loginService.generateCookies(request);
+        response.addCookie(cookies.get("access"));
+        response.addCookie(cookies.get("refresh"));
         AuthResponseDTO authResponseDTO = modelMapper.map(user, AuthResponseDTO.class);
         log.info(String.format("User %s logged in successfully!", user.getName()));
         return ResponseEntity.ok(authResponseDTO);
