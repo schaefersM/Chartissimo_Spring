@@ -61,14 +61,15 @@ public class AuthController {
         response.addCookie(accessCookie);
         response.addCookie(refreshCookie);
         AuthResponseDTO authResponseDTO = modelMapper.map(user, AuthResponseDTO.class);
+        log.info(String.format("User %s logged in successfully!", user.getName()));
         return ResponseEntity.ok(authResponseDTO);
     }
 
     @PostMapping("/auth/refresh")
     public ResponseEntity<AuthResponseDTO> refresh(HttpServletResponse response, @CookieValue("refreshToken") String refreshToken) {
-        log.info("Refreshing refreshToken...");
         refreshService.checkToken(refreshToken);
         Claims claims = jwtUtil.getRefreshClaims(refreshToken);
+        log.info("Refreshing refreshToken of user " + claims.getSubject());
         String newRefreshToken = jwtUtil.generateRefreshToken(claims.getSubject(), claims.getExpiration());
         Optional<JwtToken> jwtToken = jwtRepository.findJwtTokenByToken(refreshToken);
         if (jwtToken.isPresent()) {

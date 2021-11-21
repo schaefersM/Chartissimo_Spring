@@ -8,9 +8,11 @@ import com.schaefersm.auth.model.User;
 import com.schaefersm.auth.repository.UserRepository;
 import com.schaefersm.auth.util.ValidationUtil;
 import lombok.NonNull;
+import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+@Log
 @Service
 public class LoginService {
 
@@ -24,6 +26,7 @@ public class LoginService {
         validationUtil.validateUsername(name);
         validationUtil.validatePassword(password);
         User user = userRepository.findByName(name);
+        log.info("Logging in user " + name + "...");
         if (user == null) {
             throw new UserNotFoundException();
         }
