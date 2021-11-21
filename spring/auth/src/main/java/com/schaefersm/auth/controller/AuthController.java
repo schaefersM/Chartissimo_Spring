@@ -49,4 +49,18 @@ public class AuthController {
     @Autowired
     private UserRepository userRepository;
 
+
+    @PostMapping("/auth/login")
+    public ResponseEntity<AuthResponseDTO> login(@RequestBody AuthenticationRequest request, HttpServletResponse response) {
+        User user = loginService.login(request.getName(), request.getPassword());
+        String accessToken = jwtUtil.generateAccessToken(request.getName());
+        String refreshToken = jwtUtil.generateRefreshToken(request.getName());
+        jwtRepository.save(new JwtToken(jwtUtil.getRefreshClaims(refreshToken).getExpiration(), refreshToken));
+        Cookie accessCookie = cookieUtil.getAccessCookie(accessToken);
+        Cookie refreshCookie = cookieUtil.getRefreshCookie(refreshToken);
+        response.addCookie(accessCookie);
+        response.addCookie(refreshCookie);
+        AuthResponseDTO authResponseDTO = modelMapper.map(user, AuthResponseDTO.class);
+        return ResponseEntity.ok(authResponseDTO);
+    }
 }
