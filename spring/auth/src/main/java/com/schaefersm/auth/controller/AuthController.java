@@ -91,4 +91,16 @@ public class AuthController {
         registerService.register(request.getName(), request.getPassword(), request.getEmail());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+    @PostMapping("/auth/logout")
+    public ResponseEntity<?> logout(@CookieValue("refreshToken") String refreshToken) {
+        log.info("Logging out user...");
+        Optional<JwtToken> jwtToken = jwtRepository.findJwtTokenByToken(refreshToken);
+        if (jwtToken.isPresent()) {
+            jwtRepository.delete(jwtToken.get());
+            log.info("Jwt token deleted!");
+        }
+        log.info("User logged out successfully!");
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 }
