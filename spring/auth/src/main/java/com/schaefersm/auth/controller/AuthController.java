@@ -86,4 +86,9 @@ public class AuthController {
         return ResponseEntity.ok(authResponseDTO);
     }
 
+    @PostMapping("/auth/register")
+    public ResponseEntity<BaseResponse> register(@RequestBody RegisterRequest request) {
+        registerService.register(request.getName(), request.getPassword(), request.getEmail());
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
 }
