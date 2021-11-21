@@ -15,6 +15,27 @@ public class GatewayApplication {
         SpringApplication.run(GatewayApplication.class, args);
     }
 
+    @Autowired
+    private JwtFilter filter;
+
+    @Bean
+    RouteLocator gateway(RouteLocatorBuilder rlb) {
+        return rlb
+                .routes()
+                .route(routeSpec -> routeSpec
+                .path("/auth/login")
+                .filters(f -> f.filter(filter))
+                .uri("http://localhost:6000"))
+                .route(routeSpec -> routeSpec
+                .path("/auth/refresh")
+                .filters(f -> f.filter(filter))
+                .uri("http://localhost:6000"))
+                .route(routeSpec -> routeSpec
+                .path("/auth/register")
+                .filters(f -> f.filter(filter))
+                .uri("http://localhost:6000"))
+                .route(routeSpec -> routeSpec
+    }
 
 
 }
