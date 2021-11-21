@@ -63,4 +63,27 @@ public class AuthController {
         AuthResponseDTO authResponseDTO = modelMapper.map(user, AuthResponseDTO.class);
         return ResponseEntity.ok(authResponseDTO);
     }
+
+    @PostMapping("/auth/refresh")
+    public ResponseEntity<AuthResponseDTO> refresh(HttpServletResponse response, @CookieValue("refreshToken") String refreshToken) {
+        log.info("Refreshing refreshToken...");
+        refreshService.checkToken(refreshToken);
+        Claims claims = jwtUtil.getRefreshClaims(refreshToken);
+        String newRefreshToken = jwtUtil.generateRefreshToken(claims.getSubject(), claims.getExpiration());
+        Optional<JwtToken> jwtToken = jwtRepository.findJwtTokenByToken(refreshToken);
+        if (jwtToken.isPresent()) {
+            jwtToken.get().setToken(newRefreshToken);
+            jwtRepository.save(jwtToken.get());
+        }
+        String accessToken = jwtUtil.generateAccessToken(claims.getSubject());
+        Cookie accessCookie = cookieUtil.getAccessCookie(accessToken);
+        Cookie refreshCookie = cookieUtil.getRefreshCookie(newRefreshToken);
+        response.addCookie(accessCookie);
+        response.addCookie(refreshCookie);
+        User user = userRepository.findByName(claims.getSubject());
+        AuthResponseDTO authResponseDTO = modelMapper.map(user, AuthResponseDTO.class);
+        log.info("Everything's cool!");
+        return ResponseEntity.ok(authResponseDTO);
+    }
+
 }
