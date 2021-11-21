@@ -25,11 +25,20 @@ import java.util.Map;
 @Service
 public class LoginService {
 
-    @Autowired
-    UserRepository userRepository;
+    private JwtRepository jwtRepository;
+    private UserRepository userRepository;
+    private CookieUtil cookieUtil;
+    private JwtUtil jwtUtil;
+    private ValidationUtil validationUtil;
 
     @Autowired
-    ValidationUtil validationUtil;
+    public LoginService(JwtRepository jwtRepository, UserRepository userRepository, CookieUtil cookieUtil, JwtUtil jwtUtil, ValidationUtil validationUtil) {
+        this.jwtRepository = jwtRepository;
+        this.userRepository = userRepository;
+        this.cookieUtil = cookieUtil;
+        this.jwtUtil = jwtUtil;
+        this.validationUtil = validationUtil;
+    }
 
     public User getUserDetails(String name, String password) {
         validationUtil.validateUsername(name);

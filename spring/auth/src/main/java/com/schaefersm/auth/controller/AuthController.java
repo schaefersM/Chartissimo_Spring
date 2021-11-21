@@ -27,31 +27,20 @@ import java.util.Optional;
 @RestController
 public class AuthController {
 
-    @Autowired
-    private JwtUtil jwtUtil;
-
-    @Autowired
-    private CookieUtil cookieUtil;
-
-    @Autowired
-    private JwtRepository jwtRepository;
-
-    @Autowired
     private LoginService loginService;
-
-    @Autowired
-    private RegisterService registerService;
-
-    @Autowired
     private LogoutService logoutService;
     private RefreshService refreshService;
-
-    @Autowired
+    private RegisterService registerService;
     private ModelMapper modelMapper;
 
     @Autowired
-    private UserRepository userRepository;
-
+    public AuthController(LoginService loginService, LogoutService logoutService, RefreshService refreshService, RegisterService registerService, ModelMapper modelMapper) {
+        this.loginService = loginService;
+        this.logoutService = logoutService;
+        this.refreshService = refreshService;
+        this.registerService = registerService;
+        this.modelMapper = modelMapper;
+    }
 
     @PostMapping("/auth/login")
     public ResponseEntity<AuthResponseDTO> login(@RequestBody AuthenticationRequest request, HttpServletResponse response) {

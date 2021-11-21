@@ -24,12 +24,15 @@ import java.util.Optional;
 public class RefreshService {
 
     private JwtRepository jwtRepository;
-
+    private UserRepository userRepository;
+    private CookieUtil cookieUtil;
     private JwtUtil jwtUtil;
 
     @Autowired
-    public RefreshService(JwtRepository jwtRepository, JwtUtil jwtUtil) {
+    public RefreshService(JwtRepository jwtRepository, UserRepository userRepository, CookieUtil cookieUtil, JwtUtil jwtUtil) {
         this.jwtRepository = jwtRepository;
+        this.userRepository = userRepository;
+        this.cookieUtil = cookieUtil;
         this.jwtUtil = jwtUtil;
     }
 

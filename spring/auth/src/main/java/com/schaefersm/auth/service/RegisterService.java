@@ -15,11 +15,14 @@ import org.springframework.stereotype.Service;
 @Service
 public class RegisterService {
 
-    @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
+    private ValidationUtil validationUtil;
 
     @Autowired
-    ValidationUtil validationUtil;
+    public RegisterService(UserRepository userRepository, ValidationUtil validationUtil) {
+        this.userRepository = userRepository;
+        this.validationUtil = validationUtil;
+    }
 
     public void register(String name, String password, String email) {
         log.info("Register user " + name + "...");
