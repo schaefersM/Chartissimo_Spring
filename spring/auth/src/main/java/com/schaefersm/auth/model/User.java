@@ -3,6 +3,7 @@ package com.schaefersm.auth.model;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import javax.persistence.Entity;
 import java.time.LocalDate;
@@ -13,7 +14,7 @@ import java.time.LocalDate;
 public class User {
 
     @Id
-    private String _id;
+    private String user_id;
     private String name;
     private String email;
     private LocalDate creationDate = LocalDate.now();
