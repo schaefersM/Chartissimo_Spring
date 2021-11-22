@@ -1,5 +1,7 @@
 package com.schaefersm.chartissimo.model;
 
+import lombok.Data;
+
 import java.time.LocalDate;
 
 import javax.persistence.Entity;
@@ -9,6 +11,7 @@ import javax.persistence.Id;
 
 
 @Entity
+@Data
 public class Informatik extends Dataset {
 
     @Id
