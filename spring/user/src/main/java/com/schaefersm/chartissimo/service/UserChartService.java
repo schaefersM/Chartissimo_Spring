@@ -1,17 +1,14 @@
 package com.schaefersm.chartissimo.service;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-
-import com.mongodb.client.result.DeleteResult;
+import com.schaefersm.chartissimo.exception.ChartNameTakenException;
+import com.schaefersm.chartissimo.exception.UserChartNotFoundException;
+import com.schaefersm.chartissimo.exception.UserChartsNotFoundException;
+import com.schaefersm.chartissimo.model.Links;
 import com.schaefersm.chartissimo.model.UserChart;
-
+import com.schaefersm.chartissimo.model.UserCharts;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +19,10 @@ import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+import java.util.List;
+
 @Service
 public class UserChartService {
 
@@ -31,98 +32,85 @@ public class UserChartService {
     @Value("${docker.api.port}")
     private String dockerPort = "8080";
 
+    private final String chartCollection = "usercharts";
 
     private MongoTemplate mongoTemplate;
 
-    
-    public Map<String, Object> readAllChartsPaginated(ObjectId userId, int page, int size, List<String> host, List<String> type, HttpServletRequest request) {
     @Autowired
     public UserChartService(MongoTemplate mongoTemplate) {
         this.mongoTemplate = mongoTemplate;
     }
 
+    public Page<UserChart> getPaginatedCharts(ObjectId userId, int page, int size, List<String> host, List<String> type) {
         try {
-            Map<String, Object> response = new HashMap<>();
             Pageable paging = PageRequest.of(page, size);
             Query query = new Query();
             query.addCriteria(Criteria.where("user").is(userId));
-            if(host != null){
+            if (host != null) {
                 query.addCriteria(Criteria.where("hosts").in(host));
             }
-            if(type != null) {
+            if (type != null) {
                 query.addCriteria(Criteria.where("chartType").in(type));
             }
             query.with(paging);
-            List<UserChart> chartPages = mongoTemplate.find(query, UserChart.class, "userchart");
-            Page<UserChart> chartPage = PageableExecutionUtils.getPage(chartPages, paging, () -> mongoTemplate.count(Query.of(query).limit(-1).skip(-1), UserChart.class));
-            Map<String, Object> links = new HashMap<>();
-            if(!chartPages.isEmpty()) {
-                links = generateLinks(userId, page, size, chartPage, request);
-            } else {
-                return null;
-            } 
-            response.put("results", chartPage.getContent());
-            response.put("links", links);
-            return response;
+            List<UserChart> userCharts = mongoTemplate.find(query, UserChart.class, chartCollection);
+            Page<UserChart> chartPage = PageableExecutionUtils.getPage(userCharts, paging, () -> mongoTemplate.count(Query.of(query).limit(-1).skip(-1), UserChart.class));
+            return chartPage;
         } catch (Exception e) {
             return null;
         }
     }
-    
-    public Map<String, Object> generateLinks(ObjectId userId, int page, int size, Page<UserChart> pageContent, HttpServletRequest request) {
-        String [] splittedQueryParams = request.getQueryString().split("&");
-        String [] rangedQueryParams = Arrays.copyOfRange(splittedQueryParams, 2, splittedQueryParams.length);
+
+    public Links generateLinks(ObjectId userId, int page, int size, Page<UserChart> pageContent, HttpServletRequest request) {
+        String[] splitQueryParams = request.getQueryString().split("&");
+        String[] rangedQueryParams = Arrays.copyOfRange(splitQueryParams, 2, splitQueryParams.length);
         String paramString = "";
-        for(String param : rangedQueryParams) {
+        for (String param : rangedQueryParams) {
             paramString += "&" + param;
         }
-        Map<String, Object> links = new HashMap<>();
-        String baseUrl = String.format("http://%s:%s/api/user/%s/charts", dockerHost, dockerPort, userId);
+        String baseUrl = String.format("http://%s:%s/api/user/%s/charts", dockerHostname, dockerPort, userId);
         String self = String.format("%s?page=%s&size=%s%s", baseUrl, page, size, paramString);
-        String next = (pageContent.hasNext()) ? String.format("%s?page=%s&size=%s%s", baseUrl, page, size, paramString) : null;
-        String prev = (pageContent.isFirst()) ? null : String.format("%s?page=%s&size=%s%s", baseUrl, page-1, size, 
+        String next = (pageContent.hasNext()) ? String.format("%s?page=%s&size=%s%s", baseUrl, page + 1, size, paramString) : null;
+        String prev = (pageContent.isFirst()) ? null : String.format("%s?page=%s&size=%s%s", baseUrl, page - 1, size,
                 paramString);
         String first = String.format("%s?page=%s&size=%s%s", baseUrl, 0, size, paramString);
-        String last = String.format("%s?page=%s&size=%s%s", baseUrl, pageContent.getTotalPages()-1, size, 
-                paramString);
-        links.put("self", self);
-        links.put("next", next);
-        links.put("prev", prev);
-        links.put("first", first);
-        links.put("last", last);
-        return links;
+        String last = String.format("%s?page=%s&size=%s%s", baseUrl, pageContent.getTotalPages() - 1, size, paramString);
+        return new Links(self, next, prev, first, last);
     }
 
-    public Map<String, Object> readAllCharts(ObjectId userId, int page, int size, List<String> host, List<String> type, HttpServletRequest request) {
-        //notPaginated
-        if (page < 0) {
-            try {
-                Map<String, Object> response = new HashMap<>();
+    public UserCharts readAllCharts(ObjectId userId, int page, int size, List<String> host, List<String> type, HttpServletRequest request) {
+        try {
+            UserCharts response = new UserCharts();
+            List<UserChart> userCharts;
+            Links links;
+            if (page < 0) {
                 Query query = new Query();
                 query.addCriteria(Criteria.where("user").is(userId));
-                List<UserChart> chartPages = mongoTemplate.find(query, UserChart.class, "userchart");
-                response.put("results", chartPages);
-                return response;
-            } catch (Exception e) {
-                return null;
+                userCharts = mongoTemplate.find(query, UserChart.class, chartCollection);
+                response.setResults(userCharts);
+            } else {
+                Page firstPage = getPaginatedCharts(userId, page, size, host, type);
+                links = generateLinks(userId, page, size, firstPage, request);
+                userCharts = firstPage.getContent();
+                response.setResults(userCharts);
+                response.setLinks(links);
             }
-        } else {
-            Map<String, Object> response = readAllChartsPaginated(userId, page, size, host, type, request);
             return response;
+        } catch (Exception e) {
+            throw new UserChartsNotFoundException();
         }
     }
 
     public UserChart readOneChart(ObjectId userId, Double chartId) {
-        try {
-            Query query = new Query();
-            query.addCriteria(Criteria.where("id").is(chartId)); 
-            query.addCriteria(Criteria.where("user").is(userId));
-            query.fields().exclude("image");
-            UserChart userChart = mongoTemplate.findOne(query, UserChart.class, "userchart");
-            return userChart;
-        } catch (Exception e) {
-            return null;
+        Query query = new Query();
+        query.addCriteria(Criteria.where("id").is(chartId));
+        query.addCriteria(Criteria.where("user").is(userId));
+        query.fields().exclude("image");
+        UserChart userChart = mongoTemplate.findOne(query, UserChart.class, chartCollection);
+        if (userChart == null) {
+            throw new UserChartNotFoundException();
         }
+        return userChart;
     }
 
     public UserChart searchOneChartByName(ObjectId userId, String name) {
@@ -131,86 +119,47 @@ public class UserChartService {
             query.addCriteria(Criteria.where("name").is(name));
             query.addCriteria(Criteria.where("user").is(userId));
             query.fields().exclude("image");
-            UserChart userChart = mongoTemplate.findOne(query, UserChart.class, "userchart");
+            UserChart userChart = mongoTemplate.findOne(query, UserChart.class, chartCollection);
             return userChart;
         } catch (Exception e) {
             return null;
         }
     }
 
-	public Map<String, Object> createOneChart(ObjectId userId, UserChart userChart) {
+    public void createOneChart(ObjectId userId, UserChart userChart) {
         UserChart nameExists = searchOneChartByName(userId, userChart.getName());
-        Map<String, Object> response = new HashMap<>();
-        if(nameExists == null) {
-            try{
-                userChart.setUser(userId);
-                mongoTemplate.insert(userChart, "userchart");
-                response.put("successMessage", "Chart created successfully");
-                return response;
-            } catch (Exception e) {
-                return null;
-            }
+        if (nameExists == null) {
+            userChart.setUser(userId);
+            mongoTemplate.insert(userChart, chartCollection);
         } else {
-            response.put("errorMessage", "Name was already taken");
-            return response;
+            throw new ChartNameTakenException();
         }
 
-	}
+    }
 
     @Async
-    public Map<String, Object> updateOneChart(ObjectId userId, Double chartId, UserChart newUserChart) {
+    public void updateOneChart(ObjectId userId, Double chartId, UserChart newUserChart) {
         UserChart nameExists = searchOneChartByName(userId, newUserChart.getName());
-        Map<String, Object> response = new HashMap<>();
-        if(nameExists == null || chartId.equals(nameExists.getId())) {
-            try{
-                Query query = new Query();
-                query.addCriteria(Criteria.where("id").is(chartId));
-                query.addCriteria(Criteria.where("user").is(userId));
-                UserChart userChart = mongoTemplate.findOne(query, UserChart.class);
-                if (userChart != null) {
-                    newUserChart.setCreatedAt(userChart.getCreatedAt());
-                    newUserChart.setChartType(userChart.getChartType());
-                    newUserChart.setUser(userChart.getUser());
-                    UserChart replacedChart = mongoTemplate.findAndReplace(query, newUserChart, "userchart");
-                    if (replacedChart != null) {
-                        response.put("successMessage", "Chart updated successfully");
-                        return response;
-                    }
-                }
-                response.put("errorMessage", "Can not find chart in database");
-                return response;
-            } catch (Exception e) {
-                return null;
+        if (nameExists == null || chartId.equals(nameExists.getId())) {
+            Query query = new Query();
+            query.addCriteria(Criteria.where("id").is(chartId));
+            query.addCriteria(Criteria.where("user").is(userId));
+            UserChart userChart = mongoTemplate.findOne(query, UserChart.class);
+            if (userChart != null) {
+                newUserChart.setCreatedAt(userChart.getCreatedAt());
+                newUserChart.setChartType(userChart.getChartType());
+                newUserChart.setUser(userChart.getUser());
+                mongoTemplate.findAndReplace(query, newUserChart, chartCollection);
+            } else {
+                throw new UserChartNotFoundException();
             }
         } else {
-            response.put("errorMessage", "Name was already taken");
-            return response;
+            throw new ChartNameTakenException();
         }
     }
 
-    public Map<String, Object> deleteOneChart(ObjectId userId, Double chartId, Map<String, Object> body) {
-        Map<String, Object> response = new HashMap<>();
-        UserChart chartExists = readOneChart(userId, chartId);
-        if (chartExists != null) {
-            try{
-                Query query = new Query();
-                query.addCriteria(Criteria.where("user").is(userId));
-                query.addCriteria(Criteria.where("id").is(chartId));
-                query.addCriteria(Criteria.where("name").is(body.get("name")));
-                DeleteResult deletedChart = mongoTemplate.remove(query, UserChart.class, "userchart");
-                if (deletedChart.getDeletedCount() >= 1) {
-                    response.put("successMessage", "Chart deleted successfully");
-                    return response;
-                } else {
-                    response.put("errorMessage", "Can not find chart in database");
-                    return response;
-                }
-            } catch (Exception e) {
-                return null;
-            }
-        } else {
-            response.put("errorMessage", "Can not find chart in database");
-            return response;
-        }
+    public void deleteOneChart(ObjectId userId, Double chartId) {
+        UserChart userChart = readOneChart(userId, chartId);
+        mongoTemplate.remove(userChart, chartCollection);
     }
 }
