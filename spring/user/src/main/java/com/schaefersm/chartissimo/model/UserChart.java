@@ -11,7 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import lombok.Data;
 
 @Data
-@Document(collection = "userchart")
+@Document(collection = "usercharts")
 public class UserChart {
 
 	@Id
