@@ -34,9 +34,7 @@ public class UserConfigController {
     @GetMapping("/{userId}/config")
     public ResponseEntity<Config> readUserConfig(@PathVariable("userId") ObjectId userId) {
         UserConfig userConfig = userConfigService.getUserConfig(userId);
-        System.out.println(userConfig.getConfig().getFontSize());
         Config userConfigDto = modelMapper.map(userConfig.getConfig(), Config.class);
-        System.out.println(userConfigDto.getFontSize());
         return ResponseEntity.status(HttpStatus.OK).body(userConfigDto);
     }
 

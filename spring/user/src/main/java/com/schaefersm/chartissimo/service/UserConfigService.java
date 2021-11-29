@@ -45,9 +45,7 @@ public class UserConfigService {
             UserConfig newUserConfig = new UserConfig(config, userId);
             mongoTemplate.insert(newUserConfig);
         } else {
-            System.out.println(config);
             userConfig.setConfig(config);
-            System.out.println(userConfig.getConfig());
             mongoTemplate.save(userConfig);
         }
     }
