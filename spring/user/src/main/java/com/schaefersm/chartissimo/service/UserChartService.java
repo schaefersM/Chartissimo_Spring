@@ -24,9 +24,13 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserChartService {
-    
-    private String dockerHost = "192.168.72.132";
-    private String dockerPort = "30005";
+
+    @Value("${docker.api.host}")
+    private String dockerHostname;
+
+    @Value("${docker.api.port}")
+    private String dockerPort = "8080";
+
 
     private MongoTemplate mongoTemplate;
 
