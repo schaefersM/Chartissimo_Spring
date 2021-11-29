@@ -33,7 +33,7 @@ public class GatewayApplication {
                 .route(routeSpec -> routeSpec
                         .path("/api/user/**")
                         .filters(f -> f.filter(filter))
-                        .uri("http://localhost:6000"))
+                        .uri("http://localhost:7000"))
                 .build();
     }
 

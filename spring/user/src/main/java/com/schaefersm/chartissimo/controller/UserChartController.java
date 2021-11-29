@@ -6,6 +6,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 
 import com.schaefersm.chartissimo.model.UserChart;
+import com.schaefersm.chartissimo.model.UserCharts;
 import com.schaefersm.chartissimo.service.UserChartService;
 
 import org.bson.types.ObjectId;
@@ -25,71 +26,54 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/user")
-@CrossOrigin(origins = "http://localhost")
 public class UserChartController {
 
-	@Autowired
 	private UserChartService userChartService;
 
+	@Autowired
+	public UserChartController(UserChartService userChartService) {
+		this.userChartService = userChartService;
+	}
+
 	@GetMapping("/{userId}/charts")
-	public ResponseEntity<Map<String, Object>> getAllCharts(
+	public ResponseEntity<UserCharts> getAllCharts(
 		@PathVariable("userId") ObjectId userId, 
 		@RequestParam(defaultValue = "-1") int page,
 		@RequestParam(defaultValue = "1") int size,
 		@RequestParam(required = false) List<String> location,
 		@RequestParam(required = false) List<String> type,
 		HttpServletRequest request) {
-		Map<String, Object> userCharts = userChartService.readAllCharts(userId, page, size,  location, type, request);
-		if (userCharts != null) {
-			return ResponseEntity.status(HttpStatus.OK).body(userCharts);
-		} else {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-		}
+		UserCharts userCharts = userChartService.readAllCharts(userId, page, size, location, type, request);
+		return ResponseEntity.status(HttpStatus.OK).body(userCharts);
 	}
 
 	@GetMapping("/{userId}/charts/{chartId}")
 	public ResponseEntity<UserChart> getOneChart(@PathVariable("userId") ObjectId userId,
 			@PathVariable("chartId") Double chartId) {
 		UserChart userChart = userChartService.readOneChart(userId, chartId);
-		if (userChart != null) {
-			return ResponseEntity.status(HttpStatus.OK).body(userChart);
-		} else {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-		}
+		return ResponseEntity.status(HttpStatus.OK).body(userChart);
 	}
 
 	@PostMapping("/{userId}/charts")
 	public ResponseEntity<Map<String, Object>> addOneChart(@PathVariable("userId") ObjectId userId,
-			UserChart userChart) {
-		Map<String, Object> response = userChartService.createOneChart(userId, userChart);
-		if (response.get("errorMessage") == null && response != null) {
-			return ResponseEntity.status(HttpStatus.CREATED).build();
-		} else {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-		}
+			@RequestBody UserChart userChart) {
+		userChartService.createOneChart(userId, userChart);
+		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 
 	@PutMapping("/{userId}/charts/{chartId}")
 	public ResponseEntity<Map<String, Object>> updateOneChart(@PathVariable("userId") ObjectId userId, 
 			@PathVariable("chartId") Double chartId,
 			@RequestBody UserChart userChart) {
-		Map<String, Object> response = userChartService.updateOneChart(userId, chartId, userChart);
-		if (response.get("errorMessage") == null && response != null) {
-			return ResponseEntity.status(HttpStatus.CREATED).build();
-		} else {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-		}
+		userChartService.updateOneChart(userId, chartId, userChart);
+		return ResponseEntity.status(HttpStatus.OK).build();
 	}
 
 	@DeleteMapping("/{userId}/charts/{chartId}")
-	public ResponseEntity<Map<String, Object>> deleteOneChart(@PathVariable("userId") ObjectId userId,
+	public ResponseEntity<?> deleteOneChart(@PathVariable("userId") ObjectId userId,
 			@PathVariable("chartId") Double chartId, @RequestBody Map<String, Object> body) {
-		Map<String, Object> response = userChartService.deleteOneChart(userId, chartId, body);
-		if (response.get("errorMessage") == null && response != null) {
-			return ResponseEntity.status(HttpStatus.OK).build();
-		} else {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-		}
+		userChartService.deleteOneChart(userId, chartId);
+		return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 	}
 
 }

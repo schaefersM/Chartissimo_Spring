@@ -2,10 +2,13 @@ package com.schaefersm.chartissimo.controller;
 
 import java.util.HashMap;
 
+import com.schaefersm.chartissimo.dto.UserConfigDto;
+import com.schaefersm.chartissimo.model.Config;
 import com.schaefersm.chartissimo.model.UserConfig;
 import com.schaefersm.chartissimo.service.UserConfigService;
 
 import org.bson.types.ObjectId;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,43 +23,26 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/user")
-@CrossOrigin(origins = "http://localhost")
 public class UserConfigController {
 
-	@Autowired
-	private UserConfigService userConfigService;
+    @Autowired
+    private UserConfigService userConfigService;
 
-	@GetMapping("/{userId}/config")
-	public ResponseEntity<HashMap<String, Object>> readUserConfig(@PathVariable("userId") ObjectId userId) {
-		HashMap<String, Object> userConfig = userConfigService.getUserConfig(userId);
-		if (userConfig != null) {
-			return ResponseEntity.status(HttpStatus.OK).body(userConfig);
-		} else {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-		}
-	}
+    @Autowired
+    private ModelMapper modelMapper;
 
-	@PutMapping("/{userId}/config")
-	public ResponseEntity<UserConfig> updateUserConfig(@PathVariable("userId") ObjectId userId,
-			@RequestBody HashMap<String, HashMap<String, Object>> userConfig) {
-		UserConfig userconfig = userConfigService.updateUserConfig(userId, userConfig);
-		if (userconfig != null) {
-			return ResponseEntity.status(HttpStatus.OK).body(userconfig);
-		} else {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-		}
-	}
+    @GetMapping("/{userId}/config")
+    public ResponseEntity<Config> readUserConfig(@PathVariable("userId") ObjectId userId) {
+        UserConfig userConfig = userConfigService.getUserConfig(userId);
+        Config userConfigDto = modelMapper.map(userConfig.getConfig(), Config.class);
+        return ResponseEntity.status(HttpStatus.OK).body(userConfigDto);
+    }
 
-	@PostMapping("/{userId}/config")
-	public ResponseEntity<UserConfig> createUserConfig(@PathVariable("userId") ObjectId userId,
-			@RequestBody HashMap<String, HashMap<String, Object>> userConfig) {
-		UserConfig userconfig = userConfigService.createUserConfig(userId, userConfig);
-		if (userconfig != null) {
-			return ResponseEntity.status(HttpStatus.CREATED).body(userconfig);
-		} else {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-		}
-
-	}
+    @PostMapping("/{userId}/config")
+    public ResponseEntity<?> createUserConfig(@PathVariable("userId") ObjectId userId,
+                                              @RequestBody UserConfig userConfig) {
+        userConfigService.createUserConfig(userId, userConfig.getConfig());
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
 
 }
