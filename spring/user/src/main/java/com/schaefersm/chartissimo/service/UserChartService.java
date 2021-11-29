@@ -28,11 +28,15 @@ public class UserChartService {
     private String dockerHost = "192.168.72.132";
     private String dockerPort = "30005";
 
-    @Autowired
     private MongoTemplate mongoTemplate;
 
     
     public Map<String, Object> readAllChartsPaginated(ObjectId userId, int page, int size, List<String> host, List<String> type, HttpServletRequest request) {
+    @Autowired
+    public UserChartService(MongoTemplate mongoTemplate) {
+        this.mongoTemplate = mongoTemplate;
+    }
+
         try {
             Map<String, Object> response = new HashMap<>();
             Pageable paging = PageRequest.of(page, size);

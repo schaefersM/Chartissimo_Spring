@@ -27,8 +27,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/user")
 public class UserChartController {
 
-	@Autowired
 	private UserChartService userChartService;
+
+	@Autowired
+	public UserChartController(UserChartService userChartService) {
+		this.userChartService = userChartService;
+	}
 
 	@GetMapping("/{userId}/charts")
 	public ResponseEntity<Map<String, Object>> getAllCharts(
