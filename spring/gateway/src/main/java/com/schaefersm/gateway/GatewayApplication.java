@@ -25,15 +25,15 @@ public class GatewayApplication {
                 .route(routeSpec -> routeSpec
                         .path("/auth/**")
                         .filters(f -> f.filter(filter))
-                        .uri("http://localhost:6000"))
+                        .uri("http://auth:6000"))
                 .route(routeSpec -> routeSpec
                         .path("/api/data/**")
                         .filters(f -> f.filter(filter))
-                        .uri("http://localhost:5000"))
+                        .uri("http://data:5000"))
                 .route(routeSpec -> routeSpec
                         .path("/api/user/**")
                         .filters(f -> f.filter(filter))
-                        .uri("http://localhost:7000"))
+                        .uri("http://user:7000"))
                 .build();
     }
 
