@@ -6,7 +6,7 @@ pipeline {
         stages {
             stage('package') {
                 steps {
-                    sh './spring/auth/mvnw -f -Dmaven.test.skip=true ./spring/auth package'
+                    sh './spring/auth/mvnw -f ./spring/auth -Dmaven.test.skip=true package'
                 }
             }
             stage('build') {
