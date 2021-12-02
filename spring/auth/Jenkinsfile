@@ -1,0 +1,28 @@
+pipeline {
+    agent any
+    environment {
+        def BUILDVERSION = sh(script: "echo `date +%d%m%H%M`", returnStdout: true).trim()
+    }
+        stages {
+            stage('package') {
+                steps {
+                    sh './spring/auth/mvnw -f -Dmaven.test.skip=true ./spring/auth package'
+                }
+            }
+            stage('build') {
+                steps {
+                    sh 'docker build --no-cache -t java-auth:${BUILDVERSION} ./spring/auth'
+                }
+            }
+            stage('tag') {
+                steps {
+                    sh 'docker tag java-auth:${BUILDVERSION} localhost:32000/java-auth:${BUILDVERSION}'
+                }
+            }
+            stage('push') {
+                steps {
+                    sh 'docker push localhost:32000/java-auth:${BUILDVERSION}'
+                }
+            }
+        }
+}
