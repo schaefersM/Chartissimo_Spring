@@ -11,7 +11,7 @@ pipeline {
             }
             stage('package') {
                 steps {
-                    sh './spring/data/mvnw -f ./spring/data package'
+                    sh './spring/data/mvnw -f ./spring/data -Dmaven.test.skip=true package'
                 }
             }
             stage('build') {
