@@ -16,12 +16,12 @@ pipeline {
             }
             stage('tag') {
                 steps {
-                    sh 'docker tag java-gateway:${BUILDVERSION} localhost:32000/java-gateway:${BUILDVERSION}'
+                    sh 'docker tag java-gateway:${BUILDVERSION} localhost:5000/java-gateway:${BUILDVERSION}'
                 }
             }
             stage('push') {
                 steps {
-                    sh 'docker push localhost:32000/java-gateway:${BUILDVERSION}'
+                    sh 'docker push localhost:5000/java-gateway:${BUILDVERSION}'
                 }
             }
         }
