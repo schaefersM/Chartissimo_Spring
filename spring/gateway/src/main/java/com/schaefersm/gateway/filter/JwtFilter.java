@@ -37,6 +37,7 @@ public class JwtFilter implements GatewayFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        log.info("k8s");
         ServerHttpRequest request = exchange.getRequest();
 
         final List<String> apiEndpoints = List.of("/register", "/login", "/api/data", "/refresh");
