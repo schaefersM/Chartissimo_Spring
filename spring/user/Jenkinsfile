@@ -16,12 +16,12 @@ pipeline {
             }
             stage('tag') {
                 steps {
-                    sh 'docker tag java-user:${BUILDVERSION} localhost:32000/java-user:${BUILDVERSION}'
+                    sh 'docker tag java-user:${BUILDVERSION} localhost:5000/java-user:${BUILDVERSION}'
                 }
             }
             stage('push') {
                 steps {
-                    sh 'docker push localhost:32000/java-user:${BUILDVERSION}'
+                    sh 'docker push localhost:5000/java-user:${BUILDVERSION}'
                 }
             }
         }
