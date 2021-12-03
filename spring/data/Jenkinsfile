@@ -21,12 +21,12 @@ pipeline {
             }
             stage('tag') {
                 steps {
-                    sh 'docker tag java-data:${BUILDVERSION} localhost:32000/java-data:${BUILDVERSION}'
+                    sh 'docker tag java-data:${BUILDVERSION} localhost:5000/java-data:${BUILDVERSION}'
                 }
             }
             stage('push') {
                 steps {
-                    sh 'docker push localhost:32000/java-data:${BUILDVERSION}'
+                    sh 'docker push localhost:5000/java-data:${BUILDVERSION}'
                 }
             }
         }
