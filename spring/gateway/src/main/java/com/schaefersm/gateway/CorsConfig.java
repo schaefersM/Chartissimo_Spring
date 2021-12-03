@@ -18,7 +18,7 @@ public class CorsConfig implements WebFluxConfigurer {
    public void addCorsMappings(CorsRegistry registry) {
       registry.addMapping("/**")
             .allowCredentials(true)
-            .allowedOrigins("http://localhost:3000")
+            .allowedOrigins("http://localhost:30000")
             .allowedHeaders("*")
             .allowedMethods("*");
    }
@@ -30,6 +30,7 @@ public class CorsConfig implements WebFluxConfigurer {
       corsConfiguration.addAllowedHeader("*");
       corsConfiguration.addAllowedMethod("*");
       corsConfiguration.addAllowedOrigin("http://localhost:3000");
+      corsConfiguration.addAllowedOrigin("http://localhost:30000");
       corsConfiguration.addAllowedOrigin("http://localhost");
       UrlBasedCorsConfigurationSource corsConfigurationSource = new UrlBasedCorsConfigurationSource();
       corsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);
