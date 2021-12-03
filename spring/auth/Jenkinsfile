@@ -16,12 +16,12 @@ pipeline {
             }
             stage('tag') {
                 steps {
-                    sh 'docker tag java-auth:${BUILDVERSION} localhost:32000/java-auth:${BUILDVERSION}'
+                    sh 'docker tag java-auth:${BUILDVERSION} localhost:5000/java-auth:${BUILDVERSION}'
                 }
             }
             stage('push') {
                 steps {
-                    sh 'docker push localhost:32000/java-auth:${BUILDVERSION}'
+                    sh 'docker push localhost:5000/java-auth:${BUILDVERSION}'
                 }
             }
         }
