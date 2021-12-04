@@ -25,7 +25,7 @@ public class GatewayApplication {
                 .route(routeSpec -> routeSpec
                         .path("/auth/**")
                         .filters(f -> f.filter(filter))
-                        .uri("http://auth:6000"))
+                        .uri("http://auth-64f6f5ffd8-j8bjc:6000"))
                 .route(routeSpec -> routeSpec
                         .path("/api/data/**")
                         .filters(f -> f.filter(filter))
